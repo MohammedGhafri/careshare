@@ -156,7 +156,10 @@ function AppShell() {
       </div>
 
       <button type="button" className="floating-checklist-btn" onClick={() => setDrawerOpen(true)}>
-        📋 Checklist{outstandingCount > 0 ? ` (${outstandingCount} need attention)` : ''}
+        📋 Checklist
+        {outstandingCount > 0 && (
+          <span className="fab-suffix"> ({outstandingCount} <span className="fab-suffix-words">need attention</span>)</span>
+        )}
       </button>
 
       <DetailSheet

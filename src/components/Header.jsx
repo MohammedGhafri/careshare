@@ -21,13 +21,21 @@ export default function Header({
         </div>
       </div>
       <div className="header-actions">
-        <button type="button" className="btn scan-btn" onClick={onGenerateSummary} disabled={summaryBusy}>
-          📄 {summaryBusy ? 'Generating…' : 'Generate current view summary'}
+        <button
+          type="button"
+          className="btn scan-btn"
+          onClick={onGenerateSummary}
+          disabled={summaryBusy}
+          aria-label={summaryBusy ? 'Generating…' : 'Generate current view summary'}
+        >
+          📄 <span className="btn-label">{summaryBusy ? 'Generating…' : 'Generate current view summary'}</span>
         </button>
-        <button type="button" className="btn scan-btn" onClick={onScanMedicine}>
-          ➕ Add medication
+        <button type="button" className="btn scan-btn" onClick={onScanMedicine} aria-label="Add medication">
+          ➕ <span className="btn-label">Add medication</span>
         </button>
-        <span className="role-badge">Viewing as: Family Coordinator</span>
+        <span className="role-badge">
+          <span className="role-badge-prefix">Viewing as: </span>Family Coordinator
+        </span>
       </div>
       {summaryError && (
         <p className="summary-error" role="alert">

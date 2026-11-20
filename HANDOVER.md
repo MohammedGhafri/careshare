@@ -59,6 +59,12 @@ src/
                           rules-based alerts (unknown/missed medication,
                           overdue visit). Recomputed from live item state, so
                           resolving the underlying item clears its alert.
+  lib/prescriptionParser.js  parsePrescription(ocrText, today) — pure,
+                          rules-based extraction of medication/strength/form/
+                          dose/frequency/duration (null when unreadable);
+                          buildDoseItems() expands a confirmed record into
+                          per-dose medication items. Tested in
+                          prescriptionParser.test.js (`npm test`, vitest).
   lib/googleCalendar.js   GIS sign-in, listEvents(start,end), addEvent,
                           templateLink (demo-mode fallback, no auth needed).
   state/CareContext.jsx   useReducer + context: the single source of truth
@@ -74,6 +80,12 @@ src/
                           classes — FullCalendar's own defaults otherwise win
                           the cascade. customButtons.today overrides the
                           built-in Today button to also dispatch SELECT_DATE.
+    ScanMedicationSheet.jsx  "📷 Scan medicine" flow: getUserMedia live
+                          camera or <input capture="environment">, on-device
+                          OCR via lazily-imported tesseract.js, editable review
+                          form; confirming dispatches REGISTER_PRESCRIPTION
+                          (stores state.prescriptions + adds dose items +
+                          activity entry). In-memory only, like all state.
     ChecklistPanel.jsx    Day-scoped checklist: sticky header (close button +
                           heading + status filter chips) over a scrollable
                           list of Alerts/Medication/Visits/Tasks/Activity.

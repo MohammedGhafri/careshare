@@ -13,6 +13,28 @@ This pass also includes:
 - **Google Calendar integration** — read today's events into the Visits
   section, and "Add to Google Calendar" from any visit or medication
   reminder's detail view.
+- **Scan medicine label** — "📷 Scan medicine" in the header. Take a photo
+  with the device camera (live preview on laptops; native rear camera on
+  phones via "Take or choose photo") or upload one. The label is read
+  **on-device** with tesseract.js (the photo is never uploaded), parsed into a
+  prescription record, and shown in an editable review form. Nothing is saved
+  until a person confirms; fields that couldn't be read are highlighted and
+  must be filled in. Confirming registers the record:
+
+  ```json
+  { "medication": "Amoxicillin", "strength": "500 mg", "form": "capsule",
+    "dose": { "quantity": 1, "unit": "capsule" },
+    "frequency": { "type": "times_per_day", "count": 3 },
+    "duration_days": 5, "start_date": "2026-11-20" }
+  ```
+
+  and adds one "Due" dose per time slot (1×: 08:00 · 2×: 08:00/20:00 ·
+  3×: 08:00/14:00/20:00 · 4×: 08:00/12:00/16:00/20:00) for every day of the
+  course to the calendar and checklist. The live-camera button needs a
+  secure context (`localhost` or HTTPS); over plain-HTTP LAN on a phone, use
+  "Take or choose photo", which opens the camera directly. The OCR engine and
+  English language data are downloaded from a CDN on first scan, so the first
+  scan needs a connection.
 
 Everything else (role switching, recording medication status, alert rules/AI
 explanations, escalation) is out of scope for this first pass and covered by
@@ -35,6 +57,8 @@ To build and test the installed PWA experience:
 npm run build
 npm run preview
 ```
+
+Run the unit tests (label parser) with `npm test`.
 
 Then, in Chrome DevTools → Application, check the manifest and service
 worker, and look for the install icon in the address bar.
@@ -72,8 +96,10 @@ src/
   data/mockData.js       Synthetic data for Margaret's care circle
   lib/status.js          Maps a status value to colour/label/icon
   lib/googleCalendar.js  Sign-in, read events, add events, template link fallback
+  lib/prescriptionParser.js  OCR text -> prescription record; expands it into dose items
   components/            Header, SafetyBanner, StatusPill, Card, section views,
-                          CalendarConnect, DetailSheet, ActivityFeed
+                          CalendarConnect, DetailSheet, ActivityFeed,
+                          ScanMedicationSheet (camera capture + OCR + review form)
   App.jsx                Today Dashboard layout and state
 ```
 

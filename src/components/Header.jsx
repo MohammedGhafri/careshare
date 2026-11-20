@@ -1,4 +1,4 @@
-export default function Header() {
+export default function Header({ onScanMedicine }) {
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
@@ -14,7 +14,12 @@ export default function Header() {
           <p className="subtitle">Margaret's care today · {today}</p>
         </div>
       </div>
-      <span className="role-badge">Viewing as: Family Coordinator</span>
+      <div className="header-actions">
+        <button type="button" className="btn scan-btn" onClick={onScanMedicine}>
+          📷 Scan medicine
+        </button>
+        <span className="role-badge">Viewing as: Family Coordinator</span>
+      </div>
     </header>
   )
 }

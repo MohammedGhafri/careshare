@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import Header from './components/Header.jsx'
 import SafetyBanner from './components/SafetyBanner.jsx'
-import CalendarConnect from './components/CalendarConnect.jsx'
-import SyncStatus from './components/SyncStatus.jsx'
 import CalendarView from './components/CalendarView.jsx'
 import ChecklistPanel from './components/ChecklistPanel.jsx'
 import DetailSheet from './components/DetailSheet.jsx'
@@ -31,7 +29,6 @@ function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scanOpen, setScanOpen] = useState(false)
   const [addMedOpen, setAddMedOpen] = useState(false)
-  const [calendarConnected, setCalendarConnected] = useState(false)
   const [calendarLoading, setCalendarLoading] = useState(false)
   const [calendarError, setCalendarError] = useState(null)
   const [calendarBusy, setCalendarBusy] = useState(false)
@@ -56,22 +53,6 @@ function AppShell() {
   }, [])
 
   const outstandingCount = deriveAlerts(items).length
-
-  async function handleConnectCalendar() {
-    setCalendarLoading(true)
-    setCalendarError(null)
-    try {
-      await signIn()
-      setCalendarConnected(true)
-      const weekEnd = new Date(weekStartDate.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const events = await listEvents(weekStartDate, weekEnd)
-      dispatch({ type: 'SET_GCAL_EVENTS', events })
-    } catch (err) {
-      setCalendarError(err.message || 'Something went wrong')
-    } finally {
-      setCalendarLoading(false)
-    }
-  }
 
   async function handleRangeChange(start, end) {
     setVisibleStart(start)
@@ -162,14 +143,6 @@ function AppShell() {
         summaryError={summaryError}
       />
       <SafetyBanner />
-
-      <CalendarConnect
-        connected={calendarConnected}
-        loading={calendarLoading}
-        error={calendarError}
-        onConnect={handleConnectCalendar}
-      />
-      <SyncStatus />
 
       <div className="layout">
         <CalendarView onRangeChange={handleRangeChange} />

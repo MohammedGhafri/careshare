@@ -65,6 +65,22 @@ src/
                           buildDoseItems() expands a confirmed record into
                           per-dose medication items. Tested in
                           prescriptionParser.test.js (`npm test`, vitest).
+  lib/careApi.js          Browser client for /api/care. loadCareState()
+                          returns null when no DB is configured -> demo mode.
+  api/care.js             Vercel Function (export default { fetch }) using
+                          @neondatabase/serverless with DATABASE_URL. 503
+                          {error:'not_configured'} when unset.
+  server/careApi.js       createCareApi(sql): validation + parameterised SQL,
+                          lazily creates tables. One endpoint: GET state,
+                          POST {op:'registerPrescription'|'updateDose'}.
+                          Tested against PGlite in careApi.test.js. The Vite
+                          plugin in vite.config.js serves it in `npm run dev`
+                          (DATABASE_URL=pglite:<dir> uses embedded Postgres).
+  state/CareContext.jsx   (persistence) dispatch() runs prepare() — builds
+                          ids/timestamps/activity entries — then the pure
+                          reducer, then persist() for user-created doses only
+                          (items with prescriptionId). Mock items never save.
+                          state.sync.mode: loading | database | local.
   lib/googleCalendar.js   GIS sign-in, listEvents(start,end), addEvent,
                           templateLink (demo-mode fallback, no auth needed).
   state/CareContext.jsx   useReducer + context: the single source of truth

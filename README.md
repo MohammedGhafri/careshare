@@ -41,6 +41,12 @@ This pass also includes:
   "Take or choose photo", which opens the camera directly. The OCR engine and
   English language data are downloaded from a CDN on first scan, so the first
   scan needs a connection.
+- **Saved medication (Neon Postgres)** — when a database is connected,
+  medication you add or scan, each dose's status/notes/new time (doses you
+  add can be dragged on the calendar), and the matching activity entries are
+  saved and reloaded for everyone. A banner under the header shows whether
+  you're saved to the database or in demo mode. The demo data for Margaret
+  stays mock and resets on refresh. See "Connecting a Neon database" below.
 
 Everything else (role switching, recording medication status, alert rules/AI
 explanations, escalation) is out of scope for this first pass and covered by
@@ -68,6 +74,35 @@ Run the unit tests (label parser) with `npm test`.
 
 Then, in Chrome DevTools → Application, check the manifest and service
 worker, and look for the install icon in the address bar.
+
+## Connecting a Neon database (optional)
+
+Without a database the app runs in **demo mode**: everything works, but
+anything you add is lost on refresh.
+
+**On Vercel**
+1. Project → **Storage** → **Create Database** → **Neon** (or install Neon
+   from the Vercel Marketplace) and connect it to the project. This sets
+   `DATABASE_URL` for you.
+2. Redeploy. The tables (`prescriptions`, `doses`, `activity`) are created
+   automatically on the first request to `/api/care` — no migration step.
+
+**Locally**
+- Against Neon: `npx vercel link && npx vercel env pull .env.local`, or paste
+  the connection string into `.env.local` as `DATABASE_URL=postgresql://…`,
+  then `npm run dev`. `npm run dev` serves `/api/care` itself, so you don't
+  need `vercel dev`.
+- Without Neon: `DATABASE_URL=pglite:.pglite` in `.env.local` uses an embedded
+  Postgres stored in the `.pglite/` folder (git-ignored). `pglite:` alone
+  keeps it in memory. Dev only — it isn't used on Vercel.
+
+`DATABASE_URL` is only read on the server (it has no `VITE_` prefix), so it is
+never included in the browser bundle.
+
+> ⚠️ **No sign-in yet.** Anyone with the deployment URL can read and change
+> saved medication. That's acceptable for the synthetic-data prototype the
+> PRD describes, but add authentication before storing real people's health
+> information.
 
 ## Connecting a real Google Calendar (optional)
 
@@ -103,10 +138,16 @@ src/
   lib/status.js          Maps a status value to colour/label/icon
   lib/googleCalendar.js  Sign-in, read events, add events, template link fallback
   lib/prescriptionParser.js  OCR text -> prescription record; expands it into dose items
+  lib/careApi.js         Browser client for /api/care
+  state/CareContext.jsx  App state; loads saved data on start and saves changes
   components/            Header, SafetyBanner, StatusPill, Card, section views,
                           CalendarConnect, DetailSheet, ActivityFeed,
-                          ScanMedicationSheet (camera capture + OCR + review form)
+                          ScanMedicationSheet (camera capture + OCR + review form),
+                          AddMedicationSheet, SyncStatus (database/demo banner)
   App.jsx                Today Dashboard layout and state
+api/care.js              Vercel Function (Neon driver) — the only server entry point
+server/careApi.js        Request validation + SQL, shared by api/care.js and `npm run dev`
+server/pgliteSql.js      Embedded-Postgres adapter for tests and `pglite:` dev mode
 ```
 
 ## Notes

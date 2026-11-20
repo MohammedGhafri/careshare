@@ -1,6 +1,7 @@
-import { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react'
 import { medications, visits, tasks, activity as seedActivity, todayDate } from '../data/mockData.js'
-import { buildDoseItems, describeSchedule } from '../lib/prescriptionParser.js'
+import { buildDoseItems, clockTime, describeSchedule, makeDoseItem } from '../lib/prescriptionParser.js'
+import { loadCareState, newId, saveDoseUpdate, saveRegisteredPrescription } from '../lib/careApi.js'
 
 const CareStateContext = createContext(null)
 const CareDispatchContext = createContext(null)
@@ -19,13 +20,35 @@ function initialState() {
     selectedItemId: null,
     gcalEvents: [],
     prescriptions: [],
+    // mode: 'loading' | 'database' (saved to Neon) | 'local' (in memory only)
+    sync: { mode: 'loading', error: null },
   }
 }
 
-let activityCounter = 0
-function nextActivityId() {
-  activityCounter += 1
-  return `activity-generated-${activityCounter}`
+// Turns rows from /api/care back into prescriptions, calendar items and activity.
+function fromSaved(data) {
+  const prescriptions = new Map(data.prescriptions.map((p) => [p.id, p]))
+  const items = data.doses
+    .filter((d) => prescriptions.has(d.prescriptionId))
+    .map((d) => {
+      const p = prescriptions.get(d.prescriptionId)
+      const item = makeDoseItem(p, { id: d.id, start: new Date(d.start), end: new Date(d.end), source: p.source })
+      return {
+        ...item,
+        status: d.status,
+        updatedBy: d.updatedBy,
+        updatedAt: d.updatedAt,
+        notes: d.note || '',
+        why: d.note || item.why,
+      }
+    })
+  const activity = data.activity.map((a) => ({ ...a, at: new Date(a.at), why: a.why || undefined }))
+  return { prescriptions: data.prescriptions, items, activity }
+}
+
+const notIn = (list) => {
+  const ids = new Set(list.map((x) => x.id))
+  return (x) => !ids.has(x.id)
 }
 
 function reducer(state, action) {
@@ -53,71 +76,59 @@ function reducer(state, action) {
       return { ...state, selectedItemId: null }
 
     case 'UPDATE_STATUS': {
-      const note = action.note?.trim()
       const items = state.items.map((item) =>
         item.id === action.id
           ? {
               ...item,
               status: action.status,
               updatedBy: action.who,
-              updatedAt: formatNow(),
-              notes: note || item.notes,
-              why: note || item.why,
+              updatedAt: action.updatedAt,
+              notes: action.note || item.notes,
+              why: action.note || item.why,
             }
           : item
       )
-      const item = items.find((i) => i.id === action.id)
-      const entry = {
-        id: nextActivityId(),
-        who: action.who,
-        what: `Recorded "${item.name || item.title}" as ${action.status}`,
-        at: new Date(),
-        why: note || undefined,
-        outcome: 'Status updated',
-      }
-      return { ...state, items, activity: [entry, ...state.activity] }
+      return { ...state, items, activity: [action.activity, ...state.activity] }
     }
 
     case 'RESCHEDULE': {
       const items = state.items.map((item) =>
-        item.id === action.id ? { ...item, start: action.start, end: action.end } : item
+        item.id === action.id
+          ? {
+              ...item,
+              start: action.start,
+              end: action.end,
+              ...(item.reminderTime ? { reminderTime: clockTime(action.start) } : {}),
+            }
+          : item
       )
-      const item = items.find((i) => i.id === action.id)
-      const entry = {
-        id: nextActivityId(),
-        who: action.who || 'Sarah',
-        what: `Rescheduled "${item.name || item.title}" to ${action.start.toLocaleString('en-GB', {
-          weekday: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}`,
-        at: new Date(),
-        outcome: 'Calendar updated',
-      }
-      return { ...state, items, activity: [entry, ...state.activity] }
+      return { ...state, items, activity: [action.activity, ...state.activity] }
     }
 
     case 'REGISTER_PRESCRIPTION': {
-      const id = `rx-${state.prescriptions.length + 1}`
-      const { prescription, source = 'scan' } = action
-      const doses = buildDoseItems(prescription, id, source)
-      const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
-      const entry = {
-        id: nextActivityId(),
-        who: action.who,
-        what: source === 'scan' ? `Added ${name} from a scanned label` : `Added ${name} to the medication schedule`,
-        at: new Date(),
-        why: `${describeSchedule(prescription)} — from ${prescription.start_date}`,
-        outcome: `${doses.length} doses added to the calendar`,
-      }
+      const { id, prescription, source, doses } = action
       return {
         ...state,
         prescriptions: [...state.prescriptions, { id, source, ...prescription }],
         items: [...state.items, ...doses],
-        activity: [entry, ...state.activity],
+        activity: [action.activity, ...state.activity],
         selectedDate: doses.length ? startOfDay(doses[0].start) : state.selectedDate,
       }
     }
+
+    case 'HYDRATE': {
+      // Anything registered while the initial load was in flight is already in state.
+      const saved = fromSaved(action.data)
+      return {
+        ...state,
+        prescriptions: [...state.prescriptions, ...saved.prescriptions.filter(notIn(state.prescriptions))],
+        items: [...state.items, ...saved.items.filter(notIn(state.items))],
+        activity: [...state.activity, ...saved.activity.filter(notIn(state.activity))],
+      }
+    }
+
+    case 'SYNC_STATUS':
+      return { ...state, sync: { mode: action.mode ?? state.sync.mode, error: action.error ?? null } }
 
     case 'SET_GCAL_EVENTS':
       return { ...state, gcalEvents: action.events }
@@ -131,8 +142,152 @@ function formatNow() {
   return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
 
+// Fills in everything that isn't a pure function of state (ids, timestamps,
+// activity entries) before the reducer runs, so the exact same values are
+// shown on screen and sent to the database.
+function prepare(action, state) {
+  switch (action.type) {
+    case 'UPDATE_STATUS': {
+      const item = state.items.find((i) => i.id === action.id)
+      if (!item) return null
+      const note = action.note?.trim() || undefined
+      return {
+        ...action,
+        note,
+        updatedAt: formatNow(),
+        activity: {
+          id: newId(),
+          who: action.who,
+          what: `Recorded "${item.name || item.title}" as ${action.status}`,
+          at: new Date(),
+          why: note,
+          outcome: 'Status updated',
+        },
+      }
+    }
+
+    case 'RESCHEDULE': {
+      const item = state.items.find((i) => i.id === action.id)
+      if (!item) return null
+      return {
+        ...action,
+        activity: {
+          id: newId(),
+          who: action.who || 'Sarah',
+          what: `Rescheduled "${item.name || item.title}" to ${action.start.toLocaleString('en-GB', {
+            weekday: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`,
+          at: new Date(),
+          outcome: 'Calendar updated',
+        },
+      }
+    }
+
+    case 'REGISTER_PRESCRIPTION': {
+      const id = newId()
+      const source = action.source ?? 'scan'
+      const { prescription } = action
+      const doses = buildDoseItems(prescription, id, source)
+      const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
+      return {
+        ...action,
+        id,
+        source,
+        doses,
+        activity: {
+          id: newId(),
+          who: action.who,
+          what: source === 'scan' ? `Added ${name} from a scanned label` : `Added ${name} to the medication schedule`,
+          at: new Date(),
+          why: `${describeSchedule(prescription)} — from ${prescription.start_date}`,
+          outcome: `${doses.length} ${doses.length === 1 ? 'dose' : 'doses'} added to the calendar`,
+        },
+      }
+    }
+
+    default:
+      return action
+  }
+}
+
+// Saves user-created data only: added/scanned prescriptions and their doses.
+// The demo items from mockData.js are regenerated on every load, so changes
+// to those stay in memory.
+function persist(action, state) {
+  switch (action.type) {
+    case 'REGISTER_PRESCRIPTION':
+      return saveRegisteredPrescription({
+        prescription: { id: action.id, ...action.prescription },
+        source: action.source,
+        who: action.who,
+        doses: action.doses,
+        activity: action.activity,
+      })
+    case 'UPDATE_STATUS':
+    case 'RESCHEDULE': {
+      const item = state.items.find((i) => i.id === action.id)
+      if (!item?.prescriptionId) return null
+      return saveDoseUpdate(
+        action.type === 'UPDATE_STATUS'
+          ? { id: action.id, status: action.status, note: action.note, updatedBy: action.who, updatedAt: action.updatedAt, activity: action.activity }
+          : { id: action.id, start: action.start, end: action.end, activity: action.activity }
+      )
+    }
+    default:
+      return null
+  }
+}
+
 export function CareProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, undefined, initialState)
+  const [state, rawDispatch] = useReducer(reducer, undefined, initialState)
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  const dispatch = useCallback((action) => {
+    const current = stateRef.current
+    const prepared = prepare(action, current)
+    if (!prepared) return
+    rawDispatch(prepared)
+    if (current.sync.mode === 'local') return
+    persist(prepared, current)?.catch((err) => {
+      if (err.code === 'not_configured') {
+        rawDispatch({ type: 'SYNC_STATUS', mode: 'local' })
+        return
+      }
+      rawDispatch({
+        type: 'SYNC_STATUS',
+        error: `Couldn't save your last change (${err.message}). It's shown here but will be lost when you refresh.`,
+      })
+    })
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    loadCareState()
+      .then((data) => {
+        if (cancelled) return
+        if (!data) {
+          rawDispatch({ type: 'SYNC_STATUS', mode: 'local' })
+          return
+        }
+        rawDispatch({ type: 'HYDRATE', data })
+        rawDispatch({ type: 'SYNC_STATUS', mode: 'database' })
+      })
+      .catch((err) => {
+        if (cancelled) return
+        rawDispatch({
+          type: 'SYNC_STATUS',
+          mode: 'local',
+          error: `Couldn't load saved medication (${err.message}). Changes will only be kept until you refresh.`,
+        })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <CareStateContext.Provider value={state}>
       <CareDispatchContext.Provider value={dispatch}>{children}</CareDispatchContext.Provider>

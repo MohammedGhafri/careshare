@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Header from './components/Header.jsx'
 import SafetyBanner from './components/SafetyBanner.jsx'
 import CalendarConnect from './components/CalendarConnect.jsx'
+import SyncStatus from './components/SyncStatus.jsx'
 import CalendarView from './components/CalendarView.jsx'
 import ChecklistPanel from './components/ChecklistPanel.jsx'
 import DetailSheet from './components/DetailSheet.jsx'
@@ -123,6 +124,7 @@ function AppShell() {
         error={calendarError}
         onConnect={handleConnectCalendar}
       />
+      <SyncStatus />
 
       <div className="layout">
         <CalendarView onRangeChange={handleRangeChange} />

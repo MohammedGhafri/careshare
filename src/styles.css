@@ -286,6 +286,13 @@ a {
   color: var(--text-secondary);
 }
 
+.sync-status.has-error {
+  border-color: var(--urgent);
+  background: #FEF2F2;
+}
+
+.sync-status.has-error .note { color: #991B1B; }
+
 .header-actions {
   display: flex;
   align-items: center;

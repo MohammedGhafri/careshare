@@ -235,34 +235,46 @@ export function describeSchedule(p) {
     .join(', ')
 }
 
+export const clockTime = (date) =>
+  `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+
+// A single dose as a calendar/checklist item. Used both for newly registered
+// prescriptions and for doses loaded back from the database.
+export function makeDoseItem(prescription, { id, start, end, source = 'scan' }) {
+  const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
+  return {
+    id,
+    kind: 'medication',
+    prescriptionId: prescription.id,
+    name,
+    title: name,
+    schedule: describeSchedule(prescription),
+    reminderTime: clockTime(start),
+    start,
+    end: end ?? new Date(start.getTime() + 15 * 60 * 1000),
+    status: 'due',
+    updatedBy: null,
+    updatedAt: null,
+    // Empty rather than undefined so the detail sheet's note box starts blank
+    // instead of pre-filling (and then saving) the `why` text as a note.
+    notes: '',
+    why: source === 'scan' ? 'Added from a scanned medicine label.' : 'Added manually by the care circle.',
+    // Unlike the demo medication, doses people add can be dragged to a new time.
+    editable: true,
+  }
+}
+
 // Expands a confirmed prescription into one calendar/checklist item per dose.
 export function buildDoseItems(prescription, id, source = 'scan') {
   const [y, m, d] = prescription.start_date.split('-').map(Number)
   const times = doseTimesFor(prescription.frequency.count)
-  const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
-  const schedule = describeSchedule(prescription)
-  const why = source === 'scan' ? 'Added from a scanned medicine label.' : 'Added manually by the care circle.'
+  const withId = { ...prescription, id }
   const items = []
-
   for (let day = 0; day < prescription.duration_days; day++) {
     times.forEach(([hh, mm], doseIdx) => {
-      const start = new Date(y, m - 1, d + day, hh, mm, 0, 0)
-      items.push({
-        id: `med-${id}-${day}-${doseIdx}`,
-        kind: 'medication',
-        prescriptionId: id,
-        name,
-        title: name,
-        schedule,
-        reminderTime: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`,
-        start,
-        end: new Date(start.getTime() + 15 * 60 * 1000),
-        status: 'due',
-        updatedBy: null,
-        updatedAt: null,
-        why,
-        editable: false,
-      })
+      items.push(
+        makeDoseItem(withId, { id: `med-${id}-${day}-${doseIdx}`, start: new Date(y, m - 1, d + day, hh, mm, 0, 0), source })
+      )
     })
   }
   return items

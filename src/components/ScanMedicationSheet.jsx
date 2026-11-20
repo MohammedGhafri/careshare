@@ -321,7 +321,8 @@ export default function ScanMedicationSheet({ open, onClose }) {
           <div aria-live="polite">
             <p>
               ✅ <strong>{saved.medication} {saved.strength}</strong> registered —{' '}
-              {saved.frequency.count * saved.duration_days} doses added to the calendar from{' '}
+              {saved.frequency.count * saved.duration_days}{' '}
+              {saved.frequency.count * saved.duration_days === 1 ? 'dose' : 'doses'} added to the calendar from{' '}
               {new Date(`${saved.start_date}T00:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}.
             </p>
             <pre className="scan-json">{JSON.stringify(saved, null, 2)}</pre>

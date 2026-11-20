@@ -1,0 +1,236 @@
+MVP user stories and acceptance criteria
+Epic 1: Today Dashboard
+US01: View today's care picture
+As a family coordinator, I want to see today's medication, visits, tasks and alerts in one place so that I can quickly understand whether everything is on track.
+Acceptance criteria
+Given I open Margaret's dashboard, when today's information loads, then I can see:
+medication due today and its status
+scheduled visits/check-ins
+outstanding tasks
+active alerts
+recent activity
+Given an item is complete, then it is visually shown as green.
+Given an item requires attention, then it is visually shown as amber.
+Given an item requires urgent human attention, then it is visually shown as red.
+The dashboard shows the last recorded status rather than assuming an activity occurred.
+I can navigate from an alert or outstanding item to its details.
+Epic 2: Medication Tracker
+US02: Add a medication
+As a family coordinator, I want to record Margaret's medication schedule so that the care circle knows what medication support is expected.
+Acceptance criteria
+I can enter a medication name, schedule and reminder time.
+The medication appears on Margaret's Medication Tracker.
+Scheduled medication appears on the Today Dashboard when relevant.
+Adding or changing medication creates an Activity Feed entry.
+The prototype does not provide dosing advice or make medication recommendations.
+US03: Record medication status
+As a carer or family member, I want to record whether a scheduled medication was taken so that other people don't have to rely on WhatsApp messages or verbal handovers.
+Acceptance criteria
+For each scheduled medication event I can record:
+Taken
+Missed
+Declined
+Unknown
+The system records who made the update and when.
+The latest status is visible on the Today Dashboard.
+The change is recorded in the Activity Feed.
+If no status has been recorded within the configured prototype threshold, the status becomes Unknown and the alert rules are evaluated.
+The system never tells Margaret whether she should take or skip medication.
+Epic 3: Visits & Tasks
+US04: Schedule a visit
+As a family coordinator, I want to schedule a visit or wellbeing check and assign it to someone so that everybody knows who is responsible.
+Acceptance criteria
+I can create a visit containing:
+date
+time
+visit/check-in type
+assigned person
+optional notes
+The visit appears on the Today Dashboard when due.
+The assigned person's name is clearly displayed.
+Creating or changing the visit generates an Activity Feed entry.
+US05: Complete a visit
+As a carer or trusted volunteer, I want to record the outcome of my assigned visit so that the rest of the care circle knows what happened.
+Acceptance criteria
+I can mark an assigned visit as complete.
+I can add a short note.
+I can record whether there is a concern requiring attention.
+The system records who updated the visit and when.
+The update appears in the Activity Feed.
+A trusted volunteer sees only the information required for their assigned visit/task.
+US06: Identify a missed visit
+As a family coordinator, I want to know when a scheduled visit hasn't been completed so that I can check whether follow-up is required.
+Acceptance criteria
+Given a visit's expected completion time has passed, and it has not been completed, then the rules engine generates an alert.
+The alert explains which visit was missed and when.
+The alert identifies the person responsible for responding.
+AI may explain the coordination issue but does not determine that neglect has occurred.
+Epic 4: Care Circle
+US07: View the care circle
+As a member of Margaret's care circle, I want to know who is involved and what their role is so that I know who to contact when something needs attention.
+Acceptance criteria
+I can see Margaret as the supported person.
+I can see her:
+daughter/family coordinator
+carer
+trusted volunteer
+escalation/emergency contacts
+Each person has a clearly displayed role.
+Appropriate contact information is available according to role.
+US08: Switch roles for the prototype
+As a demo user, I want to switch between care-circle roles so that I can demonstrate what different users would experience.
+Acceptance criteria
+I can switch between:
+Supported Person
+Family Coordinator
+Carer
+Trusted Volunteer
+The interface clearly displays the currently selected role.
+Switching roles changes the information/actions available where relevant.
+No production authentication is required.
+Epic 5: Alerts & AI
+US09: Generate an alert from an unresolved medication event
+As a family coordinator, I want to be alerted when Margaret's medication status remains unknown so that I know something needs checking.
+Acceptance criteria
+Given medication was expected, when its configured check window expires without a recorded outcome, then a rules-based alert is generated.
+The alert records:
+what happened
+when it happened
+why the rule triggered
+who should respond
+The alert is visible on the Today Dashboard.
+The alert also appears in the Activity Feed.
+Alert generation is deterministic/rules-based rather than decided by AI.
+US10: Understand an alert
+As a family coordinator, I want an AI-generated plain-English explanation so that I can quickly understand why something needs attention.
+Acceptance criteria
+The explanation uses only information already recorded in CareCircle.
+It clearly distinguishes recorded facts from a suggested next step.
+Suggested actions are operational/non-clinical, for example:
+call Margaret
+message Margaret
+contact another care-circle member
+AI does not:
+diagnose a condition
+recommend treatment
+recommend medication dosage
+tell Margaret to take or skip medication
+determine that abuse or neglect has occurred
+The UI makes clear that a human decides what to do next.
+US11: Prioritise multiple outstanding issues
+As a family coordinator, I want to see which coordination issues most need my attention so that I'm not forced to reconstruct the situation from multiple updates.
+Acceptance criteria
+Active alerts can be displayed in priority order.
+Priority is based on defined prototype rules, such as unresolved/multiple events, not clinical judgement.
+The reason an item has been prioritised can be explained in plain English.
+Red status represents urgent human attention, not a clinical diagnosis.
+Epic 6: Acknowledge & Escalate
+US12: Acknowledge an alert
+As Margaret's daughter, I want to acknowledge an alert so that the care circle knows somebody is responding.
+Acceptance criteria
+I can select Acknowledge on an active alert.
+The alert displays:
+who acknowledged it
+acknowledgement time
+Other care-circle members can see that somebody is responding.
+An acknowledgement is added to the Activity Feed.
+Acknowledging an alert does not automatically mark the underlying issue as resolved.
+US13: Record an unsuccessful contact attempt
+As Margaret's daughter, I want to record that I tried but failed to contact Margaret so that other people have an accurate handover.
+Acceptance criteria
+I can record an attempted contact.
+I can select an outcome of No response / unable to contact.
+The attempt records who made it and when.
+The unsuccessful attempt appears in the Activity Feed.
+The alert remains unresolved.
+US14: Escalate an unresolved alert
+As a family coordinator, I want an unresolved issue to escalate to the next contact so that it doesn't disappear after the first person responds unsuccessfully.
+Acceptance criteria
+The prototype has a predefined escalation sequence.
+Given the primary responder cannot resolve the issue, when escalation is triggered, then the next nominated contact is identified.
+A simulated notification is created.
+The escalation is shown in the Activity Feed.
+The system never automatically contacts NHS 111 or 999.
+A human remains responsible for deciding whether professional or emergency support is required.
+Epic 7: Resolution
+US15: Resolve an alert
+As a family coordinator, I want to mark an issue resolved once Margaret has been successfully contacted so that everyone can see that no further coordination action is outstanding.
+Acceptance criteria
+I can record Contact successful.
+I can add a short outcome note.
+I can mark the alert resolved.
+The system records who resolved it and when.
+The alert disappears from the outstanding-alert view but remains available in history.
+Resolution is added to the Activity Feed.
+The UI does not infer medical wellbeing simply from successful contact.
+Epic 8: Shared Activity & Handover
+US16: View recent activity
+As a member of the care circle, I want a shared chronological record of recent care activity so that I don't need to reconstruct events from WhatsApp, a whiteboard and conversations.
+Acceptance criteria
+Activity is displayed chronologically.
+Each relevant entry shows:
+who
+what happened
+when
+why, where relevant
+outcome, where relevant
+Medication updates, visits, contact attempts, alerts, acknowledgements, escalations and resolutions are recorded.
+Entries clearly distinguish recorded actions from AI-generated explanation.
+US17: Understand recent history before a handover
+As a family member or carer, I want a concise summary of recent activity so that I can understand what has happened before supporting Margaret or speaking to a healthcare professional.
+Acceptance criteria
+AI can summarise recorded recent activity.
+The summary is based only on information stored in CareCircle.
+Important unresolved coordination issues are highlighted.
+The original activity entries remain accessible.
+The summary does not introduce diagnoses, clinical interpretation or information that wasn't recorded.
+Epic 9: Safety & Accessibility
+US18: Understand CareCircle's boundaries
+As any user, I want it to be clear what CareCircle can and cannot do so that I don't mistake coordination guidance for medical advice.
+Acceptance criteria
+The product clearly displays:
+CareCircle AI helps coordinate support. It does not provide medical advice or replace professional or emergency services.
+The safety message is visible around AI-generated content and escalation experiences.
+AI recommendations are labelled as suggestions for human consideration.
+CareCircle does not automatically make care decisions or contact emergency services.
+US19: Use CareCircle easily
+As an older or busy user, I want CareCircle to be simple and accessible so that I can understand what's happening without learning a complicated system.
+Acceptance criteria
+Primary actions use clear, plain-English labels.
+Important information does not rely on colour alone.
+Statuses include both colour and text/icon indicators.
+Interactive controls use large touch targets, targeting at least 44 × 44 CSS pixels.
+Text remains readable at increased browser zoom.
+Critical journeys can be completed without relying on hover interactions.
+Navigation remains consistent between screens.
+End-to-end demo acceptance scenario
+I'd make this the single golden path for the hackathon demo rather than trying to demonstrate every story independently.
+Scenario: Margaret's medication isn't confirmed
+Given
+Margaret has been onboarded.
+Her daughter is Family Coordinator.
+A carer and trusted volunteer have joined her care circle.
+Margaret has a scheduled medication.
+A volunteer visit has also been scheduled.
+When
+The medication's expected check window passes without confirmation.
+Its status becomes Unknown.
+A rules-based alert is triggered.
+AI explains: “Margaret's medication status has not been confirmed. This needs checking because no outcome has been recorded.”
+Margaret's daughter acknowledges the alert.
+She attempts to call Margaret.
+She records Unable to contact.
+The alert remains unresolved and is escalated to the backup contact.
+Margaret is subsequently contacted successfully.
+Her daughter records the outcome and resolves the alert.
+Then
+The dashboard returns to an appropriate non-alert state.
+The full sequence remains visible in the Activity Feed.
+The feed shows who did what, when, why and the outcome.
+No clinical conclusion is generated.
+The human care circle remains responsible for every action.
+Suggested prototype backlog
+For a less-than-one-day build, I would prioritise:
+P0: Must demoUS01, US03, US04, US05, US07, US08, US09, US10, US12, US13, US14, US15, US16, US18.
+P1: Add if time allowsUS02, US06, US11, US17, US19.
+The most important product test is whether the prototype can make the chain “what happened → who knows → who is acting → what happened next” immediately understandable. That addresses the heart of your problem statement rather than turning the prototype into a general-purpose care management system.

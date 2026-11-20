@@ -7,6 +7,7 @@ import ChecklistPanel from './components/ChecklistPanel.jsx'
 import DetailSheet from './components/DetailSheet.jsx'
 import ScanMedicationSheet from './components/ScanMedicationSheet.jsx'
 import AddMedicationSheet from './components/AddMedicationSheet.jsx'
+import SplashScreen from './components/SplashScreen.jsx'
 import { CareProvider, useCareState, useCareDispatch, useSelectedItem } from './state/CareContext.jsx'
 import { weekStartDate } from './data/mockData.js'
 import { deriveAlerts } from './lib/rules.js'
@@ -152,10 +153,32 @@ function AppShell() {
   )
 }
 
+const SPLASH_SEEN_KEY = 'careshare-splash-seen'
+
+function hasSeenSplash() {
+  try {
+    return sessionStorage.getItem(SPLASH_SEEN_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
 export default function App() {
+  const [splashVisible, setSplashVisible] = useState(!hasSeenSplash())
+
+  function dismissSplash() {
+    try {
+      sessionStorage.setItem(SPLASH_SEEN_KEY, 'true')
+    } catch {
+      // Private browsing etc. — just skip persisting, splash will show again.
+    }
+    setSplashVisible(false)
+  }
+
   return (
     <CareProvider>
       <AppShell />
+      {splashVisible && <SplashScreen onDismiss={dismissSplash} />}
     </CareProvider>
   )
 }

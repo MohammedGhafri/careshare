@@ -24,3 +24,12 @@ const STATUS_MAP = {
 export function getStatus(statusKey) {
   return STATUS_MAP[statusKey] || { tone: 'normal', label: statusKey, icon: 'ℹ️' }
 }
+
+// Shared with CalendarView (event colours) and WeeklySummaryPdf (status
+// pills) so both views agree on what each tone looks like.
+export const TONE_COLORS = {
+  complete: { bg: '#DCFCE7', border: '#22C55E', text: '#15803D' },
+  normal: { bg: '#DBEAFE', border: '#3B82F6', text: '#1D4ED8' },
+  attention: { bg: '#FEF3C7', border: '#F59E0B', text: '#92400E' },
+  urgent: { bg: '#FEE2E2', border: '#EF4444', text: '#B91C1C' },
+}

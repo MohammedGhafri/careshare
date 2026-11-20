@@ -1,4 +1,10 @@
-export default function Header({ onScanMedicine, onAddMedication }) {
+export default function Header({
+  onScanMedicine,
+  onAddMedication,
+  onGenerateSummary,
+  summaryBusy = false,
+  summaryError = null,
+}) {
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
@@ -15,14 +21,19 @@ export default function Header({ onScanMedicine, onAddMedication }) {
         </div>
       </div>
       <div className="header-actions">
-        <button type="button" className="btn scan-btn" onClick={onAddMedication}>
-          ➕ Add medication
+        <button type="button" className="btn scan-btn" onClick={onGenerateSummary} disabled={summaryBusy}>
+          📄 {summaryBusy ? 'Generating…' : 'Generate current view summary'}
         </button>
         <button type="button" className="btn scan-btn" onClick={onScanMedicine}>
-          📷 Scan medicine
+          ➕ Add medication
         </button>
         <span className="role-badge">Viewing as: Family Coordinator</span>
       </div>
+      {summaryError && (
+        <p className="summary-error" role="alert">
+          {summaryError}
+        </p>
+      )}
     </header>
   )
 }

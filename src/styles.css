@@ -307,6 +307,14 @@ a {
 
 .scan-btn:hover { background: var(--mint); }
 
+.summary-error {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FEE2E2;
+}
+
 /* Buttons */
 .btn {
   min-height: 44px;

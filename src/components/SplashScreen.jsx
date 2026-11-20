@@ -23,7 +23,7 @@ export default function SplashScreen({ onDismiss }) {
       <div className="splash-content">
         <img src="/icon.png" alt="" className="splash-icon" />
         <h1>CareShare</h1>
-        <p>Keeping Margaret's care circle on the same page.</p>
+        <p>Helping the people who care, stay connected</p>
         <button type="button" className="splash-enter-btn" onClick={handleDismiss}>
           Enter CareShare →
         </button>

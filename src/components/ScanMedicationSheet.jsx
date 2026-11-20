@@ -196,7 +196,7 @@ export default function ScanMedicationSheet({ open, onClose }) {
     <div className="overlay" onClick={onClose}>
       <div className="sheet scan-sheet" role="dialog" aria-modal="true" aria-label="Scan medicine" onClick={(e) => e.stopPropagation()}>
         <p className="card-sub" style={{ margin: 0 }}>Medication</p>
-        <h2>📷 Scan medicine label</h2>
+        <h2>➕ Add medicine</h2>
 
         {step === 'capture' && (
           <>

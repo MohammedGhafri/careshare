@@ -382,7 +382,10 @@ a {
   align-items: flex-end;
   justify-content: center;
   padding: 0;
-  z-index: 50;
+  /* Above .checklist-drawer-wrap (60) — otherwise opening an item from the
+     calendar (which also opens the drawer) leaves the detail sheet hidden
+     behind it on mobile/tablet. */
+  z-index: 70;
 }
 
 .sheet {
@@ -623,7 +626,7 @@ a {
 
 .floating-checklist-btn {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
   right: 20px;
   z-index: 40;
   min-height: 48px;
@@ -783,6 +786,129 @@ a {
   margin-left: 4px;
   font-size: 10px;
   padding: 0 4px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Mobile (phone) overrides                                                */
+/* ---------------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  .app {
+    padding: 6px 8px calc(84px + env(safe-area-inset-bottom));
+  }
+
+  /* Header collapses to a single compact row: icon-only action buttons
+     (full labels remain available to screen readers via aria-label) and a
+     shortened role badge. */
+  .app-header {
+    padding: 8px 12px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .app-header .brand img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .app-header h1 {
+    font-size: 18px;
+  }
+
+  .app-header .subtitle {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-actions .btn-label {
+    display: none;
+  }
+
+  .scan-btn {
+    padding: 10px 12px;
+  }
+
+  .role-badge-prefix {
+    display: none;
+  }
+
+  .role-badge {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .safety-banner {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .calendar-view {
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  /* FullCalendar toolbar: title gets its own centred row above the nav
+     buttons so neither wraps mid-control on a narrow screen. */
+  .calendar-view .fc .fc-header-toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .calendar-view .fc .fc-toolbar-chunk:nth-child(2) {
+    order: -1;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  .calendar-view .fc .fc-toolbar-title {
+    font-size: 16px;
+  }
+
+  .calendar-view .fc .fc-button {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  /* Taller slots keep tap targets usable; the grid scrolls internally
+     (expandRows is off on mobile) instead of squashing every hour in. */
+  .calendar-view .fc .fc-timegrid-slot {
+    height: 3em;
+  }
+
+  .calendar-view .fc .fc-timegrid-axis-cushion,
+  .calendar-view .fc .fc-timegrid-slot-label-cushion {
+    font-size: 11px;
+  }
+
+  .calendar-view .fc .fc-col-header-cell-cushion {
+    font-size: 12px;
+    padding: 4px 0;
+  }
+
+  .calendar-view .fc-event {
+    padding: 1px 2px;
+  }
+
+  .fc-event-main-custom {
+    font-size: 11px;
+  }
+
+  .floating-checklist-btn {
+    right: 12px;
+  }
+
+  .floating-checklist-btn .fab-suffix-words {
+    display: none;
+  }
+
+  .scan-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Splash screen */

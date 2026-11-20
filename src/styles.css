@@ -134,29 +134,40 @@ a {
   flex-shrink: 0;
 }
 
-/* Summary strip */
+/* Summary strip — also doubles as status filter buttons in ChecklistPanel */
 .summary-strip {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
 }
 
 .summary-chip {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  min-height: 44px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-weight: 600;
   font-size: 15px;
   border: 1px solid var(--border);
   background: #fff;
+  cursor: pointer;
 }
 
 .summary-chip.urgent { border-color: var(--urgent); color: var(--urgent); }
 .summary-chip.attention { border-color: var(--warning); color: #92600A; }
 .summary-chip.complete { border-color: var(--success); color: #157C33; }
+
+.summary-chip.urgent.is-active { background: var(--urgent); color: #fff; }
+.summary-chip.attention.is-active { background: var(--warning); color: #fff; }
+.summary-chip.complete.is-active { background: var(--success); color: #fff; }
+
+.summary-chip.clear {
+  border-style: dashed;
+  color: var(--text-secondary);
+  background: transparent;
+}
 
 /* Sections / cards */
 .section {
@@ -420,6 +431,19 @@ a {
   padding: 4px;
 }
 
+/* Pinned to the top of the scrolling drawer/sidebar (.checklist-drawer) so
+   the close button, date and status filters stay reachable while the list
+   below scrolls. */
+.checklist-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--cool-grey);
+  margin: 0 -4px;
+  padding: 16px 4px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
 .checklist-heading {
   font-size: 19px;
   margin: 0 0 12px;
@@ -461,7 +485,7 @@ a {
   bottom: 0;
   width: min(420px, 90vw);
   background: var(--cool-grey);
-  padding: 20px 16px 40px;
+  padding: 0 16px 40px;
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.25s ease;

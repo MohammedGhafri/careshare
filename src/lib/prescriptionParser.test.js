@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildDoseItems, missingFields, parsePrescription } from './prescriptionParser.js'
+import { buildDoseItems, describeSchedule, missingFields, parsePrescription } from './prescriptionParser.js'
 
 const TODAY = new Date(2026, 10, 20)
 
@@ -63,5 +63,25 @@ describe('buildDoseItems', () => {
     expect(items[0].start).toEqual(new Date(2026, 10, 20, 8, 0))
     expect(items[14].start).toEqual(new Date(2026, 10, 24, 20, 0))
     expect(items.every((i) => i.kind === 'medication' && i.status === 'due')).toBe(true)
+  })
+
+  it('handles manually added records with no per-dose amount but with instructions', () => {
+    const manual = {
+      medication: 'Paracetamol',
+      strength: '500 mg',
+      form: null,
+      dose: null,
+      frequency: { type: 'times_per_day', count: 2 },
+      duration_days: 1,
+      start_date: '2026-11-20',
+      instructions: 'with food',
+    }
+    expect(describeSchedule(manual)).toBe('2× a day for 1 day, with food')
+    const items = buildDoseItems(manual, 'rx2', 'manual')
+    expect(items.map((i) => [i.name, i.reminderTime])).toEqual([
+      ['Paracetamol 500 mg', '08:00'],
+      ['Paracetamol 500 mg', '20:00'],
+    ])
+    expect(items[0].why).toBe('Added manually by the care circle.')
   })
 })

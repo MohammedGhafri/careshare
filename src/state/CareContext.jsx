@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useReducer } from 'react'
 import { medications, visits, tasks, activity as seedActivity, todayDate } from '../data/mockData.js'
-import { buildDoseItems } from '../lib/prescriptionParser.js'
+import { buildDoseItems, describeSchedule } from '../lib/prescriptionParser.js'
 
 const CareStateContext = createContext(null)
 const CareDispatchContext = createContext(null)
@@ -99,19 +99,20 @@ function reducer(state, action) {
 
     case 'REGISTER_PRESCRIPTION': {
       const id = `rx-${state.prescriptions.length + 1}`
-      const { prescription } = action
-      const doses = buildDoseItems(prescription, id)
+      const { prescription, source = 'scan' } = action
+      const doses = buildDoseItems(prescription, id, source)
+      const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
       const entry = {
         id: nextActivityId(),
         who: action.who,
-        what: `Added ${prescription.medication} ${prescription.strength} from a scanned label`,
+        what: source === 'scan' ? `Added ${name} from a scanned label` : `Added ${name} to the medication schedule`,
         at: new Date(),
-        why: `${prescription.dose.quantity} ${prescription.dose.unit}, ${prescription.frequency.count}× a day for ${prescription.duration_days} days from ${prescription.start_date}`,
+        why: `${describeSchedule(prescription)} — from ${prescription.start_date}`,
         outcome: `${doses.length} doses added to the calendar`,
       }
       return {
         ...state,
-        prescriptions: [...state.prescriptions, { id, ...prescription }],
+        prescriptions: [...state.prescriptions, { id, source, ...prescription }],
         items: [...state.items, ...doses],
         activity: [entry, ...state.activity],
         selectedDate: doses.length ? startOfDay(doses[0].start) : state.selectedDate,

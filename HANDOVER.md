@@ -80,6 +80,10 @@ src/
                           classes — FullCalendar's own defaults otherwise win
                           the cascade. customButtons.today overrides the
                           built-in Today button to also dispatch SELECT_DATE.
+    AddMedicationSheet.jsx  "➕ Add medication" manual form: name, dose
+                          (strength), how to take (times/day, days, start
+                          date, optional instructions). Dispatches
+                          REGISTER_PRESCRIPTION with source: 'manual'.
     ScanMedicationSheet.jsx  "📷 Scan medicine" flow: getUserMedia live
                           camera or <input capture="environment">, on-device
                           OCR via lazily-imported tesseract.js, editable review

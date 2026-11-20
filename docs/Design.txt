@@ -1,0 +1,42 @@
+App Colour Palette
+Primary colours
+Deep Teal — #0F766E
+Trust, stability and care. Use for primary navigation, headers, key buttons and core branding.
+Sage Green — #10B981
+Health, wellbeing and positivity. Use for positive actions, progress and supportive care elements.
+Soft Mint — #D1FAE5
+Calm, friendly and open. Use for backgrounds, cards, selected states and subtle highlights.
+Secondary colours
+Navy — #1E293B
+Structure and readability. Use for strong headings, navigation and high-emphasis content.
+Cool Grey — #F1F5F9
+Clean, modern and neutral. Use for page backgrounds, cards and inactive UI areas.
+Warm Neutral — #FFF7ED
+Warmth and approachability. Use for alternative backgrounds, family-focused areas and softer content sections.
+Accent colours
+Blush Pink — #F472B6
+Compassion and human connection. Use sparingly for caring/family moments, highlights and brand accents.
+Amber — #F59E0B
+Attention and important updates. Use for reminders, things needing attention and upcoming actions.
+Sky Blue — #60A5FA
+Information and communication. Use for informational content, appointments, links and secondary actions.
+Lilac — #A78BFA
+Community and support. Use for family/carer coordination, people and shared-care elements.
+Status colours
+Success — #22C55E
+Use for completed medication, completed visits, confirmed actions and on-track care.
+Warning — #F59E0B
+Use for medication due, upcoming actions or something requiring attention.
+Error / Urgent — #EF4444
+Use for missed medication, urgent issues, overdue actions or critical alerts.
+Information — #3B82F6
+Use for general information, updates and informational notices.
+Text & UI colours
+Primary Text — #111827
+Use for headings and important text.
+Secondary Text — #6B7280
+Use for body copy, supporting information, timestamps and captions.
+Borders / Dividers — #E5E7EB
+Use for card borders, input fields, separators and dividers.
+Quick design principle
+Teal + mint should dominate the experience, creating a calm, trustworthy feel. Use pink, blue and lilac to distinguish people and supportive information, while green, amber and red should have consistent functional meanings for care-plan statuses and alerts.

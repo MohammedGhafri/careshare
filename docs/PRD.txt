@@ -1,0 +1,125 @@
+Product concept
+CareCircle AI helps older or vulnerable people living independently, together with their families, carers, and trusted volunteers, coordinate everyday support.
+The initial target market is England, focused on family-led support for older people living at home.
+Core proposition
+Create one shared place where a trusted care circle can see:
+Medication schedules and reminders
+Whether medication was taken, missed, declined, or unknown
+Upcoming visits and wellbeing check-ins
+Tasks and who is responsible
+Important contacts
+Recent activity
+Alerts requiring attention
+Escalations and who is responsible for responding
+Key principle
+Rules detect → AI explains → humans act.
+AI should help identify and explain potential issues but must never make clinical decisions.
+MVP screens
+Today Dashboard
+Medication due
+Visits/check-ins
+Tasks
+Outstanding alerts
+Recent activity
+Medication Tracker
+Medication name
+Schedule
+Reminder time
+Taken / missed / declined / unknown
+Who updated it and when
+Visits & Tasks
+Schedule visits/check-ins
+Assign family member, carer, or volunteer
+Mark complete
+Record notes or concerns
+Care Circle
+Supported person
+Family coordinator
+Carer
+Trusted volunteer
+Emergency/escalation contacts
+AI AlertsExamples:
+Medication status still unknown
+Medication missed
+Visit not completed
+Wellbeing check missed
+Person unable to be contacted
+Multiple unresolved events
+What happened
+Why the alert was generated
+When it happened
+Who should respond
+Suggested non-clinical next action
+EscalationExample flow:
+Missed event → alert → primary contact notified → acknowledgement → backup contact → human decides next action
+Possible human actions:
+Call the person
+Message them
+Contact another family member/carer
+Seek professional advice
+Contact NHS 111
+Contact 999 where there is immediate danger
+Activity FeedMaintain a simple audit trail showing:
+Who
+Did what
+When
+Why
+Outcome
+Roles
+Supported PersonCan see their support plan, medication, visits, contacts, and preferences.
+Family CoordinatorManages the care circle, schedules, alerts, and escalation.
+CarerViews assigned activities and records visits, medication support, and concerns.
+Trusted VolunteerOnly sees the minimum information required for their assigned visits/tasks.
+AI behaviour
+AI can:
+Summarise alerts
+Explain why something needs attention
+Prioritise outstanding coordination issues
+Suggest operational next steps
+Summarise recent activity
+AI cannot:
+Diagnose
+Prescribe
+Recommend medication doses
+Tell someone whether to take or skip medication
+Determine whether abuse or neglect has occurred
+Automatically contact emergency services
+Make autonomous care decisions
+Always keep a human in control.
+Prototype constraints
+This is a prototype to be built in less than one day, so optimise for simplicity and demonstration value.
+Use:
+Responsive web app
+Synthetic/mock data only
+Simple role switching rather than complex authentication
+Rules-based alerts
+AI only for explanations/summaries
+Simulated notifications
+Simple local/database storage
+Clear visual status colours:
+Green = completed
+Blue = normal
+Amber = attention
+Red = urgent human attention
+Demo scenario
+Create a fictional older person called Margaret who lives independently.
+Her care circle includes:
+Daughter — family coordinator
+Carer
+Trusted volunteer
+Demonstrate this journey:
+Margaret onboarded → care circle created → medication added → volunteer visit scheduled → medication status becomes unknown → AI alert generated → daughter acknowledges → unsuccessful contact attempt logged → alert escalates → Margaret contacted successfully → issue resolved → audit trail updated.
+UX principles
+The interface should feel:
+Calm
+Reassuring
+Simple
+Accessible
+Human
+Trustworthy
+Design primarily for older users and busy family members.
+Use large text, large touch targets, simple navigation, plain English, strong contrast, and minimal cognitive load.
+Safety boundary
+Display clearly throughout the product:
+CareCircle AI helps coordinate support. It does not provide medical advice or replace professional or emergency services.
+The prototype should demonstrate how AI can make informal care coordination more visible, proactive, and connected while keeping people—not AI—in control.

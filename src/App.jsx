@@ -125,10 +125,7 @@ function AppShell() {
         <div className={`checklist-drawer-wrap${drawerOpen ? ' is-open' : ''}`}>
           <div className="drawer-backdrop" onClick={closeDrawer} aria-hidden="true" />
           <div className="checklist-drawer">
-            <button type="button" className="btn btn-ghost drawer-close" onClick={closeDrawer}>
-              Close ✕
-            </button>
-            <ChecklistPanel />
+            <ChecklistPanel onClose={closeDrawer} />
           </div>
         </div>
       </div>

@@ -95,6 +95,15 @@ export default function CalendarView({ onRangeChange }) {
           center: 'title',
           right: 'timeGridDay,timeGridWeek',
         }}
+        customButtons={{
+          today: {
+            text: 'Today',
+            click: () => {
+              calendarRef.current?.getApi().today()
+              dispatch({ type: 'SELECT_DATE', date: startOfDay(new Date()) })
+            },
+          },
+        }}
         firstDay={1}
         slotMinTime="07:00:00"
         slotMaxTime="22:00:00"

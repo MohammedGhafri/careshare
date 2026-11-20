@@ -13,6 +13,12 @@ This pass also includes:
 - **Google Calendar integration** — read today's events into the Visits
   section, and "Add to Google Calendar" from any visit or medication
   reminder's detail view.
+- **Add medication** — "➕ Add medication" in the header. Enter the name,
+  the dose (strength, e.g. `500 mg`) and how to take it (times per day,
+  number of days, start date, optional instructions such as "with food").
+  It is saved in the same record shape as a scanned label (with `form`/`dose`
+  set to `null` plus an `instructions` field) and its doses are added to the
+  calendar and checklist using the same time slots listed below.
 - **Scan medicine label** — "📷 Scan medicine" in the header. Take a photo
   with the device camera (live preview on laptops; native rear camera on
   phones via "Take or choose photo") or upload one. The label is read

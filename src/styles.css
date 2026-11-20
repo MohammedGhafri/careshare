@@ -474,6 +474,26 @@ a {
 
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.field-error {
+  display: block;
+  color: var(--urgent);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.add-med-fieldset {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 14px 14px;
+  margin: 16px 0 0;
+}
+
+.add-med-fieldset legend {
+  font-weight: 600;
+  color: var(--navy);
+  padding: 0 6px;
+}
+
 @media (min-width: 720px) {
   .card-list.grid {
     display: grid;

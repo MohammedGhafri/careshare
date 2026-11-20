@@ -224,13 +224,24 @@ export function doseTimesFor(count) {
   return times
 }
 
+// One-line human summary, e.g. "1 capsule, 3× a day for 5 days, with food".
+export function describeSchedule(p) {
+  return [
+    p.dose?.quantity && p.dose?.unit ? `${p.dose.quantity} ${p.dose.unit}` : null,
+    `${p.frequency.count}× a day for ${p.duration_days} ${p.duration_days === 1 ? 'day' : 'days'}`,
+    p.instructions || null,
+  ]
+    .filter(Boolean)
+    .join(', ')
+}
+
 // Expands a confirmed prescription into one calendar/checklist item per dose.
-export function buildDoseItems(prescription, id) {
+export function buildDoseItems(prescription, id, source = 'scan') {
   const [y, m, d] = prescription.start_date.split('-').map(Number)
   const times = doseTimesFor(prescription.frequency.count)
-  const doseLabel = `${prescription.dose.quantity} ${prescription.dose.unit}`
-  const name = `${prescription.medication} ${prescription.strength}`.trim()
-  const schedule = `${doseLabel}, ${prescription.frequency.count}× a day for ${prescription.duration_days} days`
+  const name = [prescription.medication, prescription.strength].filter(Boolean).join(' ')
+  const schedule = describeSchedule(prescription)
+  const why = source === 'scan' ? 'Added from a scanned medicine label.' : 'Added manually by the care circle.'
   const items = []
 
   for (let day = 0; day < prescription.duration_days; day++) {
@@ -249,7 +260,7 @@ export function buildDoseItems(prescription, id) {
         status: 'due',
         updatedBy: null,
         updatedAt: null,
-        why: 'Added from a scanned medicine label.',
+        why,
         editable: false,
       })
     })

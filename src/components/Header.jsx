@@ -1,4 +1,4 @@
-export default function Header({ onScanMedicine }) {
+export default function Header({ onScanMedicine, onAddMedication }) {
   const today = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
@@ -15,6 +15,9 @@ export default function Header({ onScanMedicine }) {
         </div>
       </div>
       <div className="header-actions">
+        <button type="button" className="btn scan-btn" onClick={onAddMedication}>
+          ➕ Add medication
+        </button>
         <button type="button" className="btn scan-btn" onClick={onScanMedicine}>
           📷 Scan medicine
         </button>

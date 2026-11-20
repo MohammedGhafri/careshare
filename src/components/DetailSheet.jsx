@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import StatusPill from './StatusPill.jsx'
-import { useCareDispatch } from '../state/CareContext.jsx'
+import { useCareActions } from '../state/CareContext.jsx'
 
 const ACTING_AS = 'Sarah' // demo always acts as the Family Coordinator (US08 role-switching is out of scope for now)
 
@@ -63,7 +63,7 @@ const KIND_LABEL = {
 }
 
 export default function DetailSheet({ item, onClose, onAddToCalendar, calendarBusy, calendarMessage }) {
-  const dispatch = useCareDispatch()
+  const { updateStatus } = useCareActions()
   const [note, setNote] = useState('')
 
   // Reset the note draft whenever a different item is opened.
@@ -79,7 +79,7 @@ export default function DetailSheet({ item, onClose, onAddToCalendar, calendarBu
   const canEditNotes = item.kind !== 'google'
 
   function setStatus(status) {
-    dispatch({ type: 'UPDATE_STATUS', id: item.id, status, who: ACTING_AS, note })
+    updateStatus(item.id, { status, who: ACTING_AS, note })
   }
 
   return (

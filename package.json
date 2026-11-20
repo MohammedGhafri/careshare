@@ -4,8 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "description": "CareShare POC - Today Dashboard (US01) with Google Calendar integration and PWA support",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --env-file-if-exists=.env.local --watch server/index.js",
+    "dev:web": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run"
@@ -15,12 +20,14 @@
     "@fullcalendar/interaction": "6.1.22",
     "@fullcalendar/react": "6.1.22",
     "@fullcalendar/timegrid": "6.1.22",
+    "express": "^4.21.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
     "vite": "^5.4.11",
     "vite-plugin-pwa": "^0.21.1",
     "vitest": "^2.1.9"

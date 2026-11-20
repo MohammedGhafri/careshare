@@ -8,7 +8,7 @@ import DetailSheet from './components/DetailSheet.jsx'
 import ScanMedicationSheet from './components/ScanMedicationSheet.jsx'
 import AddMedicationSheet from './components/AddMedicationSheet.jsx'
 import { CareProvider, useCareState, useCareDispatch, useSelectedItem } from './state/CareContext.jsx'
-import { weekStartDate } from './data/mockData.js'
+import { weekStartDate } from './lib/dates.js'
 import { deriveAlerts } from './lib/rules.js'
 import {
   isConfigured,
@@ -20,7 +20,7 @@ import {
 } from './lib/googleCalendar.js'
 
 function AppShell() {
-  const { items, selectedItemId } = useCareState()
+  const { items, selectedItemId, status, error } = useCareState()
   const dispatch = useCareDispatch()
   const selectedItem = useSelectedItem()
 
@@ -47,6 +47,35 @@ function AppShell() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
+
+  // Initial GET /api/state hasn't resolved yet or failed outright — nothing
+  // useful to show the rest of the shell until we have (or definitively
+  // don't have) data from the CareShare API.
+  if (status === 'loading') {
+    return (
+      <div className="app app-status-screen">
+        <p>Loading Margaret's care picture…</p>
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="app app-status-screen">
+        <div className="app-status-card">
+          <h2>Can't reach the CareShare server</h2>
+          <p>{error || 'Something went wrong loading the data.'}</p>
+          <p className="card-sub">
+            Make sure the API is running — <code>npm run dev</code> should start both the web
+            app and the API together (look for "CareShare API listening" in the terminal).
+          </p>
+          <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const outstandingCount = deriveAlerts(items).length
 
@@ -115,6 +144,15 @@ function AppShell() {
     <div className="app">
       <Header onScanMedicine={() => setScanOpen(true)} onAddMedication={() => setAddMedOpen(true)} />
       <SafetyBanner />
+
+      {error && (
+        <div className="action-error-banner">
+          <span>⚠️ {error}</span>
+          <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: 'CLEAR_ERROR' })}>
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <CalendarConnect
         connected={calendarConnected}

@@ -121,6 +121,80 @@ a {
   white-space: nowrap;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Demo-only utility: pinned out of the way in the bottom-left corner and kept
+   deliberately faint so it doesn't compete with real UI. Sits below the
+   floating checklist button (40), overlay (50) and drawer (60). */
+.reset-demo-btn {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 4px 10px;
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.reset-demo-btn:hover,
+.reset-demo-btn:focus-visible {
+  opacity: 1;
+}
+
+/* Initial load / connection failure screens (App.jsx) */
+.app-status-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.app-status-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 440px;
+}
+
+.app-status-card h2 {
+  margin-top: 0;
+}
+
+.app-status-card code {
+  background: var(--cool-grey);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+/* Shown when a status update/reschedule fails to save — the optimistic UI
+   change has already been rolled back by the time this appears. */
+.action-error-banner {
+  background: #FEF2F2;
+  border: 1px solid var(--urgent);
+  border-radius: 12px;
+  padding: 7px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  color: #B91C1C;
+}
+
 /* Safety banner */
 .safety-banner {
   background: var(--warm-neutral);

@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { getStatus } from '../lib/status.js'
-import { useCareDispatch, useCareState } from '../state/CareContext.jsx'
+import { useCareActions, useCareDispatch, useCareState } from '../state/CareContext.jsx'
 
 function startOfDay(date) {
   const d = new Date(date)
@@ -31,6 +31,7 @@ const TONE_COLORS = {
 export default function CalendarView({ onRangeChange }) {
   const { items, gcalEvents, selectedItemId, selectedDate } = useCareState()
   const dispatch = useCareDispatch()
+  const { reschedule } = useCareActions()
   const calendarRef = useRef(null)
 
   const events = [...items, ...gcalEvents].map((item) => {
@@ -75,12 +76,7 @@ export default function CalendarView({ onRangeChange }) {
   }
 
   function handleEventDrop(info) {
-    dispatch({
-      type: 'RESCHEDULE',
-      id: info.event.id,
-      start: info.event.start,
-      end: info.event.end,
-    })
+    reschedule(info.event.id, { start: info.event.start, end: info.event.end, who: 'Sarah' })
   }
 
   return (

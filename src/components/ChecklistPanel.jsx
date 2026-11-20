@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCareState, useCareDispatch } from '../state/CareContext.jsx'
-import { isSameDay, todayDate } from '../data/mockData.js'
+import { isSameDay, todayDate } from '../lib/dates.js'
 import { deriveAlerts } from '../lib/rules.js'
 import { getStatus } from '../lib/status.js'
 import AlertsSection from './AlertsSection.jsx'

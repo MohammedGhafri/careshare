@@ -41,10 +41,12 @@ This pass also includes:
   "Take or choose photo", which opens the camera directly. The OCR engine and
   English language data are downloaded from a CDN on first scan, so the first
   scan needs a connection.
+- **Persistent storage** — a small local API (`server/`) backed by SQLite, so
+  status updates, notes and reschedules survive a refresh or restart instead
+  of living only in memory. See "Data & persistence" below.
 
-Everything else (role switching, recording medication status, alert rules/AI
-explanations, escalation) is out of scope for this first pass and covered by
-later user stories.
+Everything else (role switching, alert rules/AI explanations, escalation) is
+out of scope for this first pass and covered by later user stories.
 
 ## Run it
 
@@ -53,11 +55,13 @@ npm install
 npm run dev
 ```
 
-Open the printed localhost URL. Without any further setup, Google Calendar
-runs in **demo mode**: "Add to Google Calendar" opens a prefilled Google
-Calendar page in a new tab — no sign-in needed.
+This starts **both** the API (`:3001`) and the Vite dev server (`:5173`) —
+open the printed `localhost:5173` URL. Without any further setup, Google
+Calendar runs in **demo mode**: "Add to Google Calendar" opens a prefilled
+Google Calendar page in a new tab — no sign-in needed.
 
-To build and test the installed PWA experience:
+To build and test the installed PWA experience (the API still needs to be
+running separately, or use `npm run dev` which already covers it):
 
 ```bash
 npm run build
@@ -68,6 +72,33 @@ Run the unit tests (label parser) with `npm test`.
 
 Then, in Chrome DevTools → Application, check the manifest and service
 worker, and look for the install icon in the address bar.
+
+## Data & persistence
+
+All app data (medications, visits, tasks, activity log) lives in a local
+SQLite database at `server/data/careshare.db`, served by a small Express API
+in `server/`. The client (`src/lib/api.js`) talks to it via `/api/*`, which
+Vite proxies to `http://localhost:3001` in both dev and preview — no CORS
+setup needed.
+
+- **First run**: the database is empty, so the server seeds it with the same
+  synthetic Margaret scenario the POC always used (`server/seed.js`), anchored
+  to whatever day you first run it.
+- **Changes persist**: marking a medication Taken/Missed, adding a note, or
+  dragging a visit to a new time is saved to SQLite and survives a refresh or
+  an API restart.
+- **Reset demo data**: the "↺ Reset demo data" button in the header (with a
+  confirmation prompt) wipes the database and re-seeds it, re-anchored to
+  today. Useful after a demo session leaves the data in a messy state.
+- **Changing the database location**: set `CARESHARE_DB_PATH` in `.env.local`
+  (copy from `.env.example`). Do this if you hit odd database errors — see
+  the OneDrive note below.
+
+⚠️ **This project folder is OneDrive-synced**, which has previously
+corrupted/conflict-renamed generated build output here (see "Notes" below).
+The same risk applies to the SQLite file. If you see database errors that
+don't make sense, set `CARESHARE_DB_PATH` to a path outside any synced
+folder, e.g. `~/.careshare/careshare.db`.
 
 ## Connecting a real Google Calendar (optional)
 
@@ -98,6 +129,11 @@ demo mode described above. To connect a real Google account:
 ## Project structure
 
 ```
+server/
+  db.js                   SQLite (node:sqlite) schema + queries
+  seed.js                 generateSeed(now) — Margaret's synthetic scenario
+  index.js                Express API: GET /api/state, PATCH status/schedule,
+                          POST /api/reset
 src/
   data/mockData.js       Synthetic data for Margaret's care circle
   lib/status.js          Maps a status value to colour/label/icon
@@ -106,7 +142,12 @@ src/
   components/            Header, SafetyBanner, StatusPill, Card, section views,
                           CalendarConnect, DetailSheet, ActivityFeed,
                           ScanMedicationSheet (camera capture + OCR + review form)
-  App.jsx                Today Dashboard layout and state
+  lib/api.js              Client fetch wrapper for the API above
+  lib/dates.js            isSameDay, todayDate, weekStartDate helpers
+  components/             Header, SafetyBanner, StatusPill, Card, section views,
+                          CalendarConnect, DetailSheet, ActivityFeed
+  state/CareContext.jsx   Loads state from the API, optimistic update/reschedule/reset
+  App.jsx                 Today Dashboard layout and state
 ```
 
 ## Notes
@@ -114,3 +155,7 @@ src/
 - This project lives in a OneDrive-synced folder — `node_modules` will sync
   too, which can be slow. Consider excluding `node_modules` from OneDrive
   sync if `npm install` feels sluggish.
+- OneDrive has, more than once, conflict-renamed generated output mid-build
+  (e.g. `dist` → `dist 2`). If a build/preview looks wrong, `rm -rf dist &&
+  npm run build` first. See HANDOVER.md for more on this and the equivalent
+  risk for the SQLite database file.

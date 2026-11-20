@@ -5,6 +5,7 @@ import CalendarConnect from './components/CalendarConnect.jsx'
 import CalendarView from './components/CalendarView.jsx'
 import ChecklistPanel from './components/ChecklistPanel.jsx'
 import DetailSheet from './components/DetailSheet.jsx'
+import ScanMedicationSheet from './components/ScanMedicationSheet.jsx'
 import { CareProvider, useCareState, useCareDispatch, useSelectedItem } from './state/CareContext.jsx'
 import { weekStartDate } from './data/mockData.js'
 import { deriveAlerts } from './lib/rules.js'
@@ -23,6 +24,7 @@ function AppShell() {
   const selectedItem = useSelectedItem()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [scanOpen, setScanOpen] = useState(false)
   const [calendarConnected, setCalendarConnected] = useState(false)
   const [calendarLoading, setCalendarLoading] = useState(false)
   const [calendarError, setCalendarError] = useState(null)
@@ -109,7 +111,7 @@ function AppShell() {
 
   return (
     <div className="app">
-      <Header />
+      <Header onScanMedicine={() => setScanOpen(true)} />
       <SafetyBanner />
 
       <CalendarConnect
@@ -141,6 +143,8 @@ function AppShell() {
         calendarBusy={calendarBusy}
         calendarMessage={calendarMessage}
       />
+
+      <ScanMedicationSheet open={scanOpen} onClose={() => setScanOpen(false)} />
     </div>
   )
 }

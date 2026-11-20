@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useReducer } from 'react'
 import { medications, visits, tasks, activity as seedActivity, todayDate } from '../data/mockData.js'
+import { buildDoseItems } from '../lib/prescriptionParser.js'
 
 const CareStateContext = createContext(null)
 const CareDispatchContext = createContext(null)
@@ -17,6 +18,7 @@ function initialState() {
     selectedDate: todayDate,
     selectedItemId: null,
     gcalEvents: [],
+    prescriptions: [],
   }
 }
 
@@ -93,6 +95,27 @@ function reducer(state, action) {
         outcome: 'Calendar updated',
       }
       return { ...state, items, activity: [entry, ...state.activity] }
+    }
+
+    case 'REGISTER_PRESCRIPTION': {
+      const id = `rx-${state.prescriptions.length + 1}`
+      const { prescription } = action
+      const doses = buildDoseItems(prescription, id)
+      const entry = {
+        id: nextActivityId(),
+        who: action.who,
+        what: `Added ${prescription.medication} ${prescription.strength} from a scanned label`,
+        at: new Date(),
+        why: `${prescription.dose.quantity} ${prescription.dose.unit}, ${prescription.frequency.count}× a day for ${prescription.duration_days} days from ${prescription.start_date}`,
+        outcome: `${doses.length} doses added to the calendar`,
+      }
+      return {
+        ...state,
+        prescriptions: [...state.prescriptions, { id, ...prescription }],
+        items: [...state.items, ...doses],
+        activity: [entry, ...state.activity],
+        selectedDate: doses.length ? startOfDay(doses[0].start) : state.selectedDate,
+      }
     }
 
     case 'SET_GCAL_EVENTS':

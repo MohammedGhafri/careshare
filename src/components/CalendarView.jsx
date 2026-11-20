@@ -91,12 +91,19 @@ export default function CalendarView({ onRangeChange }) {
         initialView="timeGridWeek"
         initialDate={selectedDate}
         headerToolbar={{
-          left: 'prev,next today',
+          left: 'prev,next goToday',
           center: 'title',
           right: 'timeGridDay,timeGridWeek',
         }}
+        // Named `goToday`, not `today` — FullCalendar hard-codes the built-in
+        // "today" button name to auto-disable whenever its visible range
+        // already contains the current date, even when it's a customButtons
+        // override. Our checklist's "selected day" is separate state that
+        // FullCalendar doesn't know about, so e.g. picking another day in the
+        // same week left the button permanently disabled. Any other name
+        // sidesteps that disabling logic.
         customButtons={{
-          today: {
+          goToday: {
             text: 'Today',
             click: () => {
               calendarRef.current?.getApi().today()

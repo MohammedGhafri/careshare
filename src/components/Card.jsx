@@ -4,7 +4,7 @@ import StatusPill from './StatusPill.jsx'
 // A large, tappable row used across every dashboard section.
 // Clicking/activating it opens the DetailSheet (US01: navigate to details),
 // and highlights in sync with the matching event in CalendarView.
-export default function Card({ id, title, subtitle, status, tag, onSelect, isSelected }) {
+export default function Card({ id, title, subtitle, meta, note, status, tag, onSelect, isSelected }) {
   const { tone } = getStatus(status)
   return (
     <button
@@ -18,6 +18,8 @@ export default function Card({ id, title, subtitle, status, tag, onSelect, isSel
           {title}
           {tag && <span className="gcal-tag">{tag}</span>}
         </span>
+        {note && <span className="card-note">{note}</span>}
+        {meta && <span className="card-meta">{meta}</span>}
         {subtitle && <span className="card-sub">{subtitle}</span>}
       </span>
       <StatusPill status={status} />

@@ -1,6 +1,9 @@
 import Card from './Card.jsx'
+import { PersonChip, TimeChip } from './CardMeta.jsx'
+import { clock, relativeTime, useNow } from '../lib/cardMeta.js'
 
 export default function TasksSection({ tasks, selectedItemId, onSelect }) {
+  const now = useNow()
   return (
     <section className="section">
       <h2>📋 Outstanding tasks</h2>
@@ -10,7 +13,12 @@ export default function TasksSection({ tasks, selectedItemId, onSelect }) {
             key={task.id}
             id={task.id}
             title={task.title}
-            subtitle={`Assigned to ${task.assignedTo} · Due ${task.due}`}
+            meta={
+              <>
+                <PersonChip name={task.assignedTo} />
+                <TimeChip time={clock(task.start)} relative={relativeTime(task.start, task.status, now)} />
+              </>
+            }
             status={task.status}
             isSelected={task.id === selectedItemId}
             onSelect={() => onSelect(task.id)}

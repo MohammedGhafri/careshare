@@ -7,9 +7,13 @@
 //   GET                                   -> { prescriptions, doses, activity }
 //   POST { op: 'registerPrescription' }   -> saves a prescription, its doses and an activity entry
 //   POST { op: 'updateDose' }             -> records a dose status/note/reschedule plus an activity entry
+//   POST { op: 'updateItem' }             -> same, for the built-in demo tasks/visits/medication,
+//                                            stored as overrides keyed by "<item>@<date>"
 
 const MAX_BODY_BYTES = 1_000_000
 const DOSE_STATUSES = new Set(['due', 'taken', 'missed', 'declined', 'unknown'])
+const ITEM_STATUSES = new Set([...DOSE_STATUSES, 'complete', 'scheduled', 'attention', 'normal'])
+const OVERRIDE_KEY_RE = /^[a-z0-9-]{1,60}@\d{4}-\d{2}-\d{2}$/
 const SOURCES = new Set(['scan', 'manual'])
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -43,6 +47,17 @@ const SCHEMA = [
       note text
     )`,
   (sql) => sql`create index if not exists doses_prescription_id_idx on doses (prescription_id)`,
+  (sql) => sql`
+    create table if not exists item_overrides (
+      key text primary key,
+      status text,
+      note text,
+      updated_by text,
+      updated_at text,
+      starts_at timestamptz,
+      ends_at timestamptz,
+      changed_at timestamptz not null default now()
+    )`,
   (sql) => sql`
     create table if not exists activity (
       id text primary key,
@@ -137,9 +152,9 @@ function parseRegister(body) {
   return { prescription, doses, activity: activityEntry(body.activity) }
 }
 
-function parseUpdateDose(body) {
+function parseUpdateDose(body, statuses = DOSE_STATUSES) {
   const status = body.status ?? null
-  if (status != null && !DOSE_STATUSES.has(status)) throw new BadRequest('status is not a recognised dose status')
+  if (status != null && !statuses.has(status)) throw new BadRequest('status is not a recognised status')
   const start = body.start != null ? timestamp(body.start, 'start') : null
   const end = body.end != null ? timestamp(body.end, 'end') : null
   if ((start == null) !== (end == null)) throw new BadRequest('start and end must be sent together')
@@ -207,8 +222,34 @@ async function updateDose(sql, u) {
   return rows[0]?.updated ?? 0
 }
 
+function parseUpdateItem(body) {
+  if (typeof body.key !== 'string' || !OVERRIDE_KEY_RE.test(body.key)) throw new BadRequest('key must look like "<item>@YYYY-MM-DD"')
+  return { ...parseUpdateDose({ ...body, id: body.key }, ITEM_STATUSES), key: body.key }
+}
+
+async function updateItem(sql, u) {
+  const a = u.activity
+  await sql`
+    with saved as (
+      insert into item_overrides (key, status, note, updated_by, updated_at, starts_at, ends_at)
+      values (${u.key}, ${u.status}, ${u.note}, ${u.updatedBy}, ${u.updatedAt}, ${u.start}::timestamptz, ${u.end}::timestamptz)
+      on conflict (key) do update set
+        status = coalesce(excluded.status, item_overrides.status),
+        note = coalesce(excluded.note, item_overrides.note),
+        updated_by = coalesce(excluded.updated_by, item_overrides.updated_by),
+        updated_at = coalesce(excluded.updated_at, item_overrides.updated_at),
+        starts_at = coalesce(excluded.starts_at, item_overrides.starts_at),
+        ends_at = coalesce(excluded.ends_at, item_overrides.ends_at),
+        changed_at = now()
+      returning key
+    )
+    insert into activity (id, who, what, why, outcome, at)
+    select ${a.id}, ${a.who}, ${a.what}, ${a.why}, ${a.outcome}, ${a.at}
+    from saved`
+}
+
 async function loadState(sql) {
-  const [prescriptions, doses, activity] = await Promise.all([
+  const [prescriptions, doses, activity, overrides] = await Promise.all([
     sql`
       select id, source, medication, strength, form, dose_quantity, dose_unit, frequency_type,
              frequency_count, duration_days, to_char(start_date, 'YYYY-MM-DD') as start_date,
@@ -218,6 +259,10 @@ async function loadState(sql) {
       select id, prescription_id, starts_at, ends_at, status, updated_by, updated_at, note
       from doses order by starts_at`,
     sql`select id, who, what, why, outcome, at from activity order by at desc limit 500`,
+    // Demo items only exist for the current week, so older overrides are never needed.
+    sql`
+      select key, status, note, updated_by, updated_at, starts_at, ends_at
+      from item_overrides where changed_at > now() - interval '60 days'`,
   ])
 
   return {
@@ -252,6 +297,15 @@ async function loadState(sql) {
       why: r.why,
       outcome: r.outcome,
       at: new Date(r.at).toISOString(),
+    })),
+    overrides: overrides.map((r) => ({
+      key: r.key,
+      status: r.status,
+      note: r.note,
+      updatedBy: r.updated_by,
+      updatedAt: r.updated_at,
+      start: r.starts_at ? new Date(r.starts_at).toISOString() : null,
+      end: r.ends_at ? new Date(r.ends_at).toISOString() : null,
     })),
   }
 }
@@ -291,6 +345,10 @@ export function createCareApi(sql) {
       if (body?.op === 'updateDose') {
         const updated = await updateDose(sql, parseUpdateDose(body))
         return updated ? json(200, { ok: true }) : json(404, { error: 'Dose not found' })
+      }
+      if (body?.op === 'updateItem') {
+        await updateItem(sql, parseUpdateItem(body))
+        return json(200, { ok: true })
       }
       return json(400, { error: 'Unknown op' })
     } catch (err) {

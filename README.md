@@ -41,12 +41,15 @@ This pass also includes:
   "Take or choose photo", which opens the camera directly. The OCR engine and
   English language data are downloaded from a CDN on first scan, so the first
   scan needs a connection.
-- **Saved medication (Neon Postgres)** — when a database is connected,
-  medication you add or scan, each dose's status/notes/new time (doses you
-  add can be dragged on the calendar), and the matching activity entries are
-  saved and reloaded for everyone. A banner under the header shows whether
-  you're saved to the database or in demo mode. The demo data for Margaret
-  stays mock and resets on refresh. See "Connecting a Neon database" below.
+- **Saved to a database (Neon Postgres)** — when a database is connected,
+  everything you change is saved and reloaded for everyone: medication you
+  add or scan, every status/note you record (medication, visits and tasks),
+  calendar drags, and the activity feed. The built-in demo items for Margaret
+  are still generated fresh each week; changes to them are stored separately
+  against the item *and date* (table `item_overrides`), so completing this
+  week's task doesn't complete next week's. A banner under the header shows
+  whether you're saved to the database or in demo mode. See "Connecting a
+  Neon database" below.
 
 Everything else (role switching, recording medication status, alert rules/AI
 explanations, escalation) is out of scope for this first pass and covered by
@@ -84,7 +87,8 @@ anything you add is lost on refresh.
 1. Project → **Storage** → **Create Database** → **Neon** (or install Neon
    from the Vercel Marketplace) and connect it to the project. This sets
    `DATABASE_URL` for you.
-2. Redeploy. The tables (`prescriptions`, `doses`, `activity`) are created
+2. Redeploy. The tables (`prescriptions`, `doses`, `item_overrides`,
+   `activity`) are created
    automatically on the first request to `/api/care` — no migration step.
 
 **Locally**

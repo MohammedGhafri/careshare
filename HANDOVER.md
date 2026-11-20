@@ -78,8 +78,11 @@ src/
                           (DATABASE_URL=pglite:<dir> uses embedded Postgres).
   state/CareContext.jsx   (persistence) dispatch() runs prepare() — builds
                           ids/timestamps/activity entries — then the pure
-                          reducer, then persist() for user-created doses only
-                          (items with prescriptionId). Mock items never save.
+                          reducer, then persist(): doses of added medication
+                          (prescriptionId) -> updateDose; built-in demo items
+                          (overrideKey = "<item>@YYYY-MM-DD", set in
+                          mockData.js) -> updateItem, stored in
+                          item_overrides and re-applied on load.
                           state.sync.mode: loading | database | local.
   lib/googleCalendar.js   GIS sign-in, listEvents(start,end), addEvent,
                           templateLink (demo-mode fallback, no auth needed).

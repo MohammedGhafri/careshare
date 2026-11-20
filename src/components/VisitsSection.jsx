@@ -1,13 +1,11 @@
 import Card from './Card.jsx'
+import { DetailChip, PersonChip, TimeChip } from './CardMeta.jsx'
+import { clock, duration, relativeTime, useNow } from '../lib/cardMeta.js'
 
-function formatTime(date) {
-  if (!date) return ''
-  const d = date instanceof Date ? date : new Date(date)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
+const toDate = (value) => (value instanceof Date ? value : new Date(value))
 
 export default function VisitsSection({ visits, gcalEvents, selectedItemId, onSelect }) {
+  const now = useNow()
   return (
     <section className="section">
       <h2>📅 Visits &amp; check-ins</h2>
@@ -16,8 +14,17 @@ export default function VisitsSection({ visits, gcalEvents, selectedItemId, onSe
           <Card
             key={visit.id}
             id={visit.id}
-            title={`${visit.type} — ${visit.assignedTo}`}
-            subtitle={`${formatTime(visit.start)} – ${formatTime(visit.end)}`}
+            title={visit.type}
+            meta={
+              <>
+                <PersonChip name={visit.assignedTo} />
+                <TimeChip
+                  time={`${clock(visit.start)}–${clock(visit.end)}`}
+                  relative={relativeTime(visit.start, visit.status, now)}
+                />
+                <DetailChip icon="⏳">{duration(visit.start, visit.end)}</DetailChip>
+              </>
+            }
             status={visit.status}
             isSelected={visit.id === selectedItemId}
             onSelect={() => onSelect(visit.id)}
@@ -26,12 +33,22 @@ export default function VisitsSection({ visits, gcalEvents, selectedItemId, onSe
 
         {gcalEvents.map((event) => {
           const fcId = `gcal-${event.id}`
+          const start = toDate(event.start)
+          const end = toDate(event.end)
+          const valid = !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())
           return (
             <Card
               key={event.id}
               id={fcId}
               title={event.title}
-              subtitle={`${formatTime(event.start)} – ${formatTime(event.end)}`}
+              meta={
+                valid && (
+                  <>
+                    <TimeChip time={`${clock(start)}–${clock(end)}`} relative={relativeTime(start, 'scheduled', now)} />
+                    <DetailChip icon="⏳">{duration(start, end)}</DetailChip>
+                  </>
+                )
+              }
               status="scheduled"
               tag="From Google Calendar"
               isSelected={fcId === selectedItemId}

@@ -1,4 +1,5 @@
 import Card from './Card.jsx'
+import { PersonChip } from './CardMeta.jsx'
 
 export default function AlertsSection({ alerts, selectedItemId, onSelect }) {
   if (alerts.length === 0) {
@@ -18,7 +19,13 @@ export default function AlertsSection({ alerts, selectedItemId, onSelect }) {
           <Card
             key={alert.id}
             title={alert.title}
-            subtitle={alert.why}
+            note={alert.why}
+            meta={
+              <span className="meta-group">
+                <span className="meta-label">To respond</span>
+                <PersonChip name={alert.whoShouldRespond?.split(' (')[0]} />
+              </span>
+            }
             status={alert.status}
             isSelected={alert.itemId === selectedItemId}
             onSelect={() => onSelect(alert.itemId)}

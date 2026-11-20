@@ -10,8 +10,8 @@ export default function SyncStatus() {
         {sync.error
           ? `⚠️ ${sync.error}`
           : sync.mode === 'database'
-            ? '💾 Saved to the database — medication you add or scan, and what you record against it, is kept for the whole care circle.'
-            : "💾 Demo mode — no database connected. Medication you add is kept until you refresh. See README.md to connect Neon."}
+            ? '💾 Saved to the database — medication you add or scan, and every status, note and time change, is kept for the whole care circle.'
+            : "💾 Demo mode — no database connected. Changes are kept until you refresh. See README.md to connect Neon."}
       </span>
     </div>
   )

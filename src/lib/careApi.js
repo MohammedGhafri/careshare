@@ -75,3 +75,21 @@ export function saveDoseUpdate({ id, status, note, updatedBy, updatedAt, start, 
     }),
   })
 }
+
+// Changes to the built-in demo tasks/visits/medication, keyed by item@date.
+export function saveItemUpdate({ key, status, note, updatedBy, updatedAt, start, end, activity }) {
+  return request({
+    method: 'POST',
+    body: JSON.stringify({
+      op: 'updateItem',
+      key,
+      status,
+      note: note || undefined,
+      updatedBy,
+      updatedAt,
+      start: start?.toISOString(),
+      end: end?.toISOString(),
+      activity: serialiseActivity(activity),
+    }),
+  })
+}

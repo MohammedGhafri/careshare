@@ -1,0 +1,650 @@
+:root {
+  /* Primary */
+  --teal: #0F766E;
+  --sage: #10B981;
+  --mint: #D1FAE5;
+
+  /* Secondary */
+  --navy: #1E293B;
+  --cool-grey: #F1F5F9;
+  --warm-neutral: #FFF7ED;
+
+  /* Accent */
+  --blush-pink: #F472B6;
+  --amber: #F59E0B;
+  --sky-blue: #60A5FA;
+  --lilac: #A78BFA;
+
+  /* Status */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --urgent: #EF4444;
+  --info: #3B82F6;
+
+  /* Text / UI */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border: #E5E7EB;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--cool-grey);
+}
+
+h1, h2, h3 {
+  color: var(--navy);
+  line-height: 1.25;
+}
+
+button {
+  font: inherit;
+}
+
+a {
+  color: var(--teal);
+}
+
+:focus-visible {
+  outline: 3px solid var(--sky-blue);
+  outline-offset: 2px;
+}
+
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--teal);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.app-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-header .brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.app-header h1 {
+  color: #fff;
+  font-size: 22px;
+  margin: 0;
+}
+
+.app-header .subtitle {
+  margin: 2px 0 0;
+  font-size: 15px;
+  color: var(--mint);
+}
+
+.role-badge {
+  background: var(--mint);
+  color: var(--teal);
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+/* Safety banner */
+.safety-banner {
+  background: var(--warm-neutral);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--amber);
+  border-radius: 12px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+/* Summary strip */
+.summary-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.summary-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.summary-chip.urgent { border-color: var(--urgent); color: var(--urgent); }
+.summary-chip.attention { border-color: var(--warning); color: #92600A; }
+.summary-chip.complete { border-color: var(--success); color: #157C33; }
+
+/* Sections / cards */
+.section {
+  margin-bottom: 24px;
+}
+
+.section h2 {
+  font-size: 19px;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: var(--teal);
+  box-shadow: 0 2px 10px rgba(15, 118, 110, 0.12);
+}
+
+.card.is-selected {
+  box-shadow: 0 0 0 3px var(--sky-blue);
+}
+
+.card.tone-urgent { border-left: 6px solid var(--urgent); }
+.card.tone-attention { border-left: 6px solid var(--warning); }
+.card.tone-complete { border-left: 6px solid var(--success); }
+.card.tone-normal { border-left: 6px solid var(--info); }
+
+.card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.card-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.gcal-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #DBEAFE;
+  border-radius: 6px;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+
+/* Status pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-pill.tone-complete { background: #DCFCE7; color: #15803D; }
+.status-pill.tone-normal { background: #DBEAFE; color: #1D4ED8; }
+.status-pill.tone-attention { background: #FEF3C7; color: #92400E; }
+.status-pill.tone-urgent { background: #FEE2E2; color: #B91C1C; }
+
+/* Calendar connect */
+.calendar-connect {
+  background: var(--warm-neutral);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.calendar-connect .note {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Buttons */
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: #fff;
+}
+
+.btn-primary:hover { background: #0C5F58; }
+
+.btn-secondary {
+  background: #fff;
+  color: var(--teal);
+  border: 2px solid var(--teal);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border);
+}
+
+.btn-primary.is-active {
+  box-shadow: 0 0 0 3px var(--mint);
+}
+
+/* Notes field */
+.field-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 14px 0 4px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  resize: vertical;
+  color: var(--text-primary);
+}
+
+.textarea:focus-visible {
+  outline: 3px solid var(--sky-blue);
+  outline-offset: 1px;
+}
+
+/* Detail sheet / modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  z-index: 50;
+}
+
+.sheet {
+  background: #fff;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 20px 20px 0 0;
+  padding: 24px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+  .overlay { align-items: center; }
+  .sheet { border-radius: 20px; }
+}
+
+.sheet h2 {
+  margin-top: 0;
+}
+
+.sheet dl {
+  margin: 16px 0;
+}
+
+.sheet dt {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+}
+
+.sheet dd {
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+@media (min-width: 720px) {
+  .card-list.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Calendar + checklist layout                                             */
+/* ---------------------------------------------------------------------- */
+
+.layout {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.calendar-view {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.checklist-panel {
+  padding: 4px;
+}
+
+.checklist-heading {
+  font-size: 19px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.today-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal);
+  background: var(--mint);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+/* On mobile the checklist is an off-canvas drawer that slides in from the right. */
+.checklist-drawer-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.checklist-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 90vw);
+  background: var(--cool-grey);
+  padding: 20px 16px 40px;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  box-shadow: -4px 0 24px rgba(17, 24, 39, 0.15);
+}
+
+.checklist-drawer-wrap.is-open {
+  pointer-events: auto;
+}
+
+.checklist-drawer-wrap.is-open .drawer-backdrop {
+  opacity: 1;
+}
+
+.checklist-drawer-wrap.is-open .checklist-drawer {
+  transform: translateX(0);
+}
+
+.drawer-close {
+  display: block;
+  margin: 0 0 16px auto;
+}
+
+.floating-checklist-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 40;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--teal);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.35);
+  cursor: pointer;
+}
+
+/* Desktop: calendar and checklist sit side by side; the drawer chrome
+   (backdrop, slide transform, floating button) is switched off because the
+   panel is simply shown inline and is always visible. */
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 16px;
+  }
+
+  .checklist-drawer-wrap {
+    position: static;
+    inset: auto;
+    pointer-events: auto;
+    min-height: 0;
+  }
+
+  .drawer-backdrop {
+    display: none;
+  }
+
+  .checklist-drawer {
+    position: static;
+    width: auto;
+    height: 100%;
+    min-height: 0;
+    transform: none;
+    box-shadow: none;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow-y: auto;
+  }
+
+  .drawer-close {
+    display: none;
+  }
+
+  .floating-checklist-btn {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* FullCalendar theming                                                    */
+/* ---------------------------------------------------------------------- */
+
+.calendar-view {
+  --fc-border-color: var(--border);
+  /* Deliberately distinct from the "selected day" teal/mint treatment below,
+     so today and whatever day is selected never look identical. */
+  --fc-today-bg-color: rgba(96, 165, 250, 0.12);
+  --fc-neutral-bg-color: var(--cool-grey);
+  --fc-page-bg-color: #fff;
+  --fc-now-indicator-color: var(--blush-pink);
+  --fc-button-bg-color: var(--teal);
+  --fc-button-border-color: var(--teal);
+  --fc-button-hover-bg-color: #0C5F58;
+  --fc-button-hover-border-color: #0C5F58;
+  --fc-button-active-bg-color: #0C5F58;
+  --fc-small-font-size: 13px;
+}
+
+.calendar-view .fc {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.calendar-view .fc .fc-toolbar-title {
+  font-size: 19px;
+  color: var(--navy);
+}
+
+.calendar-view .fc .fc-button {
+  min-height: 40px;
+  text-transform: capitalize;
+  box-shadow: none !important;
+}
+
+.calendar-view .fc th.is-selected-day,
+.calendar-view .fc .fc-col-header-cell.is-selected-day {
+  background: var(--teal);
+}
+
+.calendar-view .fc .fc-col-header-cell.is-selected-day .fc-col-header-cell-cushion {
+  color: #fff;
+  font-weight: 700;
+}
+
+.calendar-view .fc .fc-daygrid-day.is-selected-day,
+.calendar-view .fc .fc-timegrid-col.is-selected-day {
+  background: var(--mint);
+}
+
+/* Today gets its own subtle, persistent marker (a bold underlined date)
+   independent of selection, so "today" and "the day you clicked" never
+   look the same. When today also happens to be selected, the stronger
+   teal/mint selected-day treatment above takes over. */
+.calendar-view .fc .fc-col-header-cell.fc-day-today:not(.is-selected-day) .fc-col-header-cell-cushion {
+  color: var(--teal);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Tone colours (background/border/text) are set directly on each event by
+   CalendarView (TONE_COLORS) as inline styles, so they render reliably
+   regardless of FullCalendar's own default event CSS. This just shapes the
+   accent border and spacing. */
+.calendar-view .fc-event {
+  border: none;
+  border-left: 4px solid transparent;
+  padding: 1px 4px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.calendar-view .fc-event.is-selected {
+  box-shadow: 0 0 0 3px var(--sky-blue);
+}
+
+.calendar-view .fc-event.is-gcal {
+  border-left-style: dashed;
+}
+
+.fc-event-main-custom {
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.fc-event-title-custom {
+  font-weight: 600;
+}
+
+.fc-event-assignee {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.fc-event-main-custom .gcal-tag {
+  margin-left: 4px;
+  font-size: 10px;
+  padding: 0 4px;
+}

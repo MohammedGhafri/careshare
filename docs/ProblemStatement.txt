@@ -1,0 +1,4 @@
+Problem statement
+A person's care is shared across a large network of family members, professional carers and friends, but there is no single, reliable and accessible view of their current care needs, recent events and upcoming responsibilities. Important information about medication, medical incidents, appointments, care provided and handovers is fragmented across WhatsApp, a kitchen whiteboard and verbal conversations, making it difficult for each person to know what has happened, what has been done and what needs to happen next.
+ 
+This fragmentation can contribute to missed medication or care, incomplete information being provided to healthcare professionals, time spent searching for or reconstructing information, and anxiety and disagreement within the family.

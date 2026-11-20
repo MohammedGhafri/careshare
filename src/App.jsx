@@ -10,8 +10,10 @@ import ScanMedicationSheet from './components/ScanMedicationSheet.jsx'
 import AddMedicationSheet from './components/AddMedicationSheet.jsx'
 import SplashScreen from './components/SplashScreen.jsx'
 import { CareProvider, useCareState, useCareDispatch, useSelectedItem } from './state/CareContext.jsx'
-import { weekStartDate } from './data/mockData.js'
+import { supportedPerson, careCircle, weekStartDate } from './data/mockData.js'
 import { deriveAlerts } from './lib/rules.js'
+import { buildWeeklySummary, startOfWeek } from './lib/weeklySummary.js'
+import { downloadSummaryPdf } from './lib/downloadSummaryPdf.js'
 import {
   isConfigured,
   isSignedIn,
@@ -22,7 +24,7 @@ import {
 } from './lib/googleCalendar.js'
 
 function AppShell() {
-  const { items, selectedItemId } = useCareState()
+  const { items, selectedItemId, activity, gcalEvents } = useCareState()
   const dispatch = useCareDispatch()
   const selectedItem = useSelectedItem()
 
@@ -34,6 +36,9 @@ function AppShell() {
   const [calendarError, setCalendarError] = useState(null)
   const [calendarBusy, setCalendarBusy] = useState(false)
   const [calendarMessage, setCalendarMessage] = useState(null)
+  const [visibleStart, setVisibleStart] = useState(weekStartDate)
+  const [summaryBusy, setSummaryBusy] = useState(false)
+  const [summaryError, setSummaryError] = useState(null)
 
   // Opening an item from the calendar should surface the linked checklist
   // entry — on mobile this is the drawer; on desktop it's just a no-op
@@ -69,12 +74,46 @@ function AppShell() {
   }
 
   async function handleRangeChange(start, end) {
+    setVisibleStart(start)
     if (!isConfigured() || !isSignedIn()) return
     try {
       const events = await listEvents(start, end)
       dispatch({ type: 'SET_GCAL_EVENTS', events })
     } catch (err) {
       setCalendarError(err.message || 'Could not refresh Google Calendar events')
+    }
+  }
+
+  async function handleGenerateSummary() {
+    setSummaryBusy(true)
+    setSummaryError(null)
+    try {
+      const weekStart = startOfWeek(visibleStart)
+      const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+      let gcalEventsForWeek = gcalEvents
+      if (isConfigured() && isSignedIn()) {
+        try {
+          gcalEventsForWeek = await listEvents(weekStart, weekEnd)
+        } catch {
+          // Fall back to whatever's already in state rather than failing
+          // the whole summary over a Google refresh error.
+        }
+      }
+
+      const summary = buildWeeklySummary({
+        items,
+        activity,
+        gcalEvents: gcalEventsForWeek,
+        weekStart,
+        person: supportedPerson,
+        careCircle,
+      })
+      await downloadSummaryPdf(summary)
+    } catch (err) {
+      setSummaryError(err.message || 'Could not generate the summary')
+    } finally {
+      setSummaryBusy(false)
     }
   }
 
@@ -115,7 +154,13 @@ function AppShell() {
 
   return (
     <div className="app">
-      <Header onScanMedicine={() => setScanOpen(true)} onAddMedication={() => setAddMedOpen(true)} />
+      <Header
+        onScanMedicine={() => setScanOpen(true)}
+        onAddMedication={() => setAddMedOpen(true)}
+        onGenerateSummary={handleGenerateSummary}
+        summaryBusy={summaryBusy}
+        summaryError={summaryError}
+      />
       <SafetyBanner />
 
       <CalendarConnect

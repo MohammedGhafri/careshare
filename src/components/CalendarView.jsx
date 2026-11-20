@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { getStatus } from '../lib/status.js'
+import { getStatus, TONE_COLORS } from '../lib/status.js'
 import { useCareDispatch, useCareState } from '../state/CareContext.jsx'
 
 function startOfDay(date) {
@@ -15,15 +15,9 @@ function toFcId(item) {
   return item.kind === 'google' ? `gcal-${item.id}` : item.id
 }
 
-// Matches StatusPill's tone colours (src/lib/status.js + styles.css) — set
-// directly on each FullCalendar event (not just via CSS classes) so the
-// colours always win regardless of FullCalendar's own default event styles.
-const TONE_COLORS = {
-  complete: { bg: '#DCFCE7', border: '#22C55E', text: '#15803D' },
-  normal: { bg: '#DBEAFE', border: '#3B82F6', text: '#1D4ED8' },
-  attention: { bg: '#FEF3C7', border: '#F59E0B', text: '#92400E' },
-  urgent: { bg: '#FEE2E2', border: '#EF4444', text: '#B91C1C' },
-}
+// TONE_COLORS lives in lib/status.js so WeeklySummaryPdf can reuse the same
+// mapping — set directly on each FullCalendar event (not just via CSS
+// classes) so the colours always win regardless of FullCalendar's defaults.
 
 // Day/Week calendar built on FullCalendar, sharing state with ChecklistPanel
 // via CareContext so selecting, updating or rescheduling an item in either

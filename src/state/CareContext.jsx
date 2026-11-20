@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react'
 import { medications, visits, tasks, activity as seedActivity, todayDate } from '../data/mockData.js'
 import { buildDoseItems, clockTime, describeSchedule, makeDoseItem } from '../lib/prescriptionParser.js'
-import { loadCareState, newId, saveDoseUpdate, saveRegisteredPrescription } from '../lib/careApi.js'
+import { loadCareState, newId, saveDoseUpdate, saveItemUpdate, saveRegisteredPrescription } from '../lib/careApi.js'
 
 const CareStateContext = createContext(null)
 const CareDispatchContext = createContext(null)
@@ -44,6 +44,27 @@ function fromSaved(data) {
     })
   const activity = data.activity.map((a) => ({ ...a, at: new Date(a.at), why: a.why || undefined }))
   return { prescriptions: data.prescriptions, items, activity }
+}
+
+// Re-applies saved status/note/time changes to the regenerated demo items.
+function applyOverrides(items, overrides = []) {
+  if (!overrides.length) return items
+  const byKey = new Map(overrides.map((o) => [o.key, o]))
+  return items.map((item) => {
+    const o = item.overrideKey && byKey.get(item.overrideKey)
+    if (!o) return item
+    const start = o.start ? new Date(o.start) : item.start
+    return {
+      ...item,
+      ...(o.status ? { status: o.status } : {}),
+      ...(o.updatedBy ? { updatedBy: o.updatedBy } : {}),
+      ...(o.updatedAt ? { updatedAt: o.updatedAt } : {}),
+      ...(o.note ? { notes: o.note, why: o.note } : {}),
+      start,
+      end: o.end ? new Date(o.end) : item.end,
+      ...(o.start && item.reminderTime ? { reminderTime: clockTime(start) } : {}),
+    }
+  })
 }
 
 const notIn = (list) => {
@@ -122,7 +143,7 @@ function reducer(state, action) {
       return {
         ...state,
         prescriptions: [...state.prescriptions, ...saved.prescriptions.filter(notIn(state.prescriptions))],
-        items: [...state.items, ...saved.items.filter(notIn(state.items))],
+        items: [...applyOverrides(state.items, action.data.overrides), ...saved.items.filter(notIn(state.items))],
         activity: [...state.activity, ...saved.activity.filter(notIn(state.activity))],
       }
     }
@@ -212,9 +233,9 @@ function prepare(action, state) {
   }
 }
 
-// Saves user-created data only: added/scanned prescriptions and their doses.
-// The demo items from mockData.js are regenerated on every load, so changes
-// to those stay in memory.
+// Saves added/scanned prescriptions and their doses, plus changes to the
+// built-in demo items (stored as overrides keyed by item@date, because the
+// demo items themselves are regenerated on every load).
 function persist(action, state) {
   switch (action.type) {
     case 'REGISTER_PRESCRIPTION':
@@ -228,12 +249,13 @@ function persist(action, state) {
     case 'UPDATE_STATUS':
     case 'RESCHEDULE': {
       const item = state.items.find((i) => i.id === action.id)
-      if (!item?.prescriptionId) return null
-      return saveDoseUpdate(
+      const change =
         action.type === 'UPDATE_STATUS'
-          ? { id: action.id, status: action.status, note: action.note, updatedBy: action.who, updatedAt: action.updatedAt, activity: action.activity }
-          : { id: action.id, start: action.start, end: action.end, activity: action.activity }
-      )
+          ? { status: action.status, note: action.note, updatedBy: action.who, updatedAt: action.updatedAt, activity: action.activity }
+          : { start: action.start, end: action.end, activity: action.activity }
+      if (item?.prescriptionId) return saveDoseUpdate({ id: action.id, ...change })
+      if (item?.overrideKey) return saveItemUpdate({ key: item.overrideKey, ...change })
+      return null
     }
     default:
       return null

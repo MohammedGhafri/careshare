@@ -1,6 +1,9 @@
 import Card from './Card.jsx'
+import { DetailChip, PersonChip, TimeChip } from './CardMeta.jsx'
+import { relativeTime, useNow } from '../lib/cardMeta.js'
 
 export default function MedicationSection({ medications, selectedItemId, onSelect }) {
+  const now = useNow()
   return (
     <section className="section">
       <h2>💊 Medication due today</h2>
@@ -10,7 +13,18 @@ export default function MedicationSection({ medications, selectedItemId, onSelec
             key={med.id}
             id={med.id}
             title={med.name}
-            subtitle={`Reminder ${med.reminderTime} · ${med.schedule}`}
+            meta={
+              <>
+                <TimeChip time={med.reminderTime} relative={relativeTime(med.start, med.status, now)} />
+                <DetailChip icon="🔁">{med.schedule}</DetailChip>
+                {med.updatedBy && (
+                  <span className="meta-group">
+                    <span className="meta-label">by</span>
+                    <PersonChip name={med.updatedBy} />
+                  </span>
+                )}
+              </>
+            }
             status={med.status}
             isSelected={med.id === selectedItemId}
             onSelect={() => onSelect(med.id)}

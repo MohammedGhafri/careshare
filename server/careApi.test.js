@@ -43,7 +43,7 @@ describe('care API', () => {
   })
 
   it('creates its schema on first use and returns empty state', async () => {
-    expect(await get(handle)).toEqual({ prescriptions: [], doses: [], activity: [] })
+    expect(await get(handle)).toEqual({ prescriptions: [], doses: [], activity: [], overrides: [] })
   })
 
   it('saves a prescription with its doses and activity, and reads back the same record', async () => {
@@ -93,7 +93,7 @@ describe('care API', () => {
       { op: 'drop tables' },
     ]
     for (const body of bad) expect((await post(handle, body)).status).toBe(400)
-    expect(await get(handle)).toEqual({ prescriptions: [], doses: [], activity: [] })
+    expect(await get(handle)).toEqual({ prescriptions: [], doses: [], activity: [], overrides: [] })
   })
 
   it('returns 404 for an unknown dose and 409 for a duplicate save', async () => {
@@ -102,5 +102,29 @@ describe('care API', () => {
     const res = await post(handle, { op: 'updateDose', id: 'med-nope', status: 'taken', activity: { id: 'a9', who: 'x', what: 'x', at: '2026-11-20T10:00:00Z' } })
     expect(res.status).toBe(404)
     expect((await get(handle)).activity).toHaveLength(1)
+  })
+
+  describe('built-in item overrides', () => {
+    const act = (id) => ({ id, who: 'Sarah', what: 'x', at: '2026-11-20T15:00:00.000Z' })
+    const key = 'task-0@2026-11-20'
+
+    it('saves a status, then merges a later note and reschedule into the same override', async () => {
+      expect((await post(handle, { op: 'updateItem', key, status: 'complete', updatedBy: 'Sarah', updatedAt: '15:00', activity: act('o1') })).status).toBe(200)
+      expect((await post(handle, { op: 'updateItem', key, status: 'attention', note: 'Pharmacy closed', activity: act('o2') })).status).toBe(200)
+      expect((await post(handle, { op: 'updateItem', key, start: '2026-11-20T16:00:00.000Z', end: '2026-11-20T16:30:00.000Z', activity: act('o3') })).status).toBe(200)
+
+      const state = await get(handle)
+      expect(state.overrides).toEqual([
+        { key, status: 'attention', note: 'Pharmacy closed', updatedBy: 'Sarah', updatedAt: '15:00', start: '2026-11-20T16:00:00.000Z', end: '2026-11-20T16:30:00.000Z' },
+      ])
+      expect(state.activity.map((a) => a.id)).toEqual(expect.arrayContaining(['o1', 'o2', 'o3']))
+    })
+
+    it('rejects malformed keys and unknown statuses', async () => {
+      expect((await post(handle, { op: 'updateItem', key: 'task-0', status: 'complete', activity: act('o4') })).status).toBe(400)
+      expect((await post(handle, { op: 'updateItem', key: "x'; drop table activity;--@2026-11-20", status: 'complete', activity: act('o5') })).status).toBe(400)
+      expect((await post(handle, { op: 'updateItem', key, status: 'eaten', activity: act('o6') })).status).toBe(400)
+      expect((await get(handle)).overrides).toEqual([])
+    })
   })
 })

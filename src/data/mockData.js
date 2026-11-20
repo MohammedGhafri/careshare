@@ -37,6 +37,16 @@ function plusMinutes(date, minutes) {
   return new Date(date.getTime() + minutes * 60 * 1000)
 }
 
+// Saved changes to demo items (status, notes, new time) are keyed by the item
+// id plus the date it was generated for, so marking this week's task
+// complete doesn't also complete next week's copy.
+function overrideKey(id, date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${id}@${y}-${m}-${d}`
+}
+
 function isSameDay(a, b) {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -94,6 +104,7 @@ for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
 
     medications.push({
       id: `med-${def.key}-${dayOffset}`,
+      overrideKey: overrideKey(`med-${def.key}`, start),
       kind: 'medication',
       name: def.name,
       title: def.name,
@@ -126,6 +137,7 @@ export const visits = VISIT_DEFS.map((v, idx) => {
   const end = plusMinutes(start, 45)
   return {
     id: `visit-${idx}`,
+    overrideKey: overrideKey(`visit-${idx}`, start),
     kind: 'visit',
     type: v.type,
     title: `${v.type} — ${v.assignedTo}`,
@@ -153,6 +165,7 @@ export const tasks = TASK_DEFS.map((t, idx) => {
   const end = plusMinutes(start, 30)
   return {
     id: `task-${idx}`,
+    overrideKey: overrideKey(`task-${idx}`, start),
     kind: 'task',
     title: t.title,
     assignedTo: t.assignedTo,

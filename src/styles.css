@@ -236,6 +236,94 @@ a {
   color: var(--text-secondary);
 }
 
+/* Card details as chips instead of a grey line */
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: var(--cool-grey);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.meta-chip > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-person {
+  background: #fff;
+  padding-left: 3px;
+  font-weight: 600;
+}
+
+.meta-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.meta-time {
+  background: #F0FDFA;
+  border-color: #99F6E4;
+  color: var(--teal);
+}
+
+.meta-strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-relative {
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.meta-relative.is-past { color: #B45309; }
+
+.meta-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.card-note {
+  font-size: 14px;
+  font-style: italic;
+  color: #475569;
+  border-left: 3px solid var(--border);
+  padding-left: 8px;
+}
+
 .gcal-tag {
   display: inline-block;
   margin-left: 8px;
